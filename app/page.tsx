@@ -148,23 +148,24 @@ export default function Home() {
         let entrada: Date | null = null
         let saida: Date | null = null
 
-        for (const pattern of patterns) {
+        for (let i = 0; i < patterns.length; i++) {
+          const pattern = patterns[i]
           const match = line.match(pattern)
           if (match) {
             console.log('Pattern matched:', pattern, 'matches:', match)
-            if (pattern === patterns[0]) {
+            if (i === 0) {
               // 2024-01-15 08:00 - 17:00
               entrada = new Date(`${match[1]}T${match[2]}`)
               saida = new Date(`${match[1]}T${match[3]}`)
-            } else if (pattern === patterns[1]) {
+            } else if (i === 1) {
               // 2024-01-15 08:00, 2024-01-15 17:00
               entrada = new Date(`${match[1]}T${match[2]}`)
               saida = new Date(`${match[3]}T${match[4]}`)
-            } else if (pattern === patterns[2]) {
+            } else if (i === 2) {
               // 15/01/2024 08:00 - 17:00
               entrada = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[4]}`)
               saida = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[5]}`)
-            } else if (pattern === patterns[3]) {
+            } else if (i === 3) {
               // 15/01/2024 08:00, 15/01/2024 17:00
               entrada = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[4]}`)
               saida = new Date(`${match[7]}-${match[6]}-${match[5]}T${match[8]}`)
