@@ -14,11 +14,17 @@ export default function Home() {
     tipoSalario: 'mensal',
     valorSalario: 5000,
     horasMensais: 220,
+    currency: 'BRL',
     percentualExtra: 50,
     percentualNoturno: 20,
+    percentualDomingo: 100,
+    percentualFeriado: 100,
     horasDiarias: 8,
-    inicioNoturno: 22,
+    horasSabado: 6,
+    inicioNoturno: 20,
     fimNoturno: 5,
+    feriados: [],
+    sabadosLivres: [],
   })
 
   const [inputText, setInputText] = useState(`2025-01-15 12:00 - 16:00
@@ -67,6 +73,8 @@ export default function Home() {
       valorNormal: acc.valorNormal + record.valorNormal,
       valorExtra: acc.valorExtra + record.valorExtra,
       valorNoturno: acc.valorNoturno + record.valorNoturno,
+      valorDomingo: acc.valorDomingo + record.valorDomingo,
+      valorFeriado: acc.valorFeriado + record.valorFeriado,
       valorTotal: acc.valorTotal + record.valorTotal,
     }),
     {
@@ -76,6 +84,8 @@ export default function Home() {
       valorNormal: 0,
       valorExtra: 0,
       valorNoturno: 0,
+      valorDomingo: 0,
+      valorFeriado: 0,
       valorTotal: 0,
     }
   )
@@ -102,9 +112,9 @@ export default function Home() {
           error={error}
         />
 
-        <ResultsTable records={records} totais={totais} />
+        <ResultsTable records={records} totais={totais} currency={config.currency} />
 
-        {records.length > 0 && <SummaryCards totais={totais} />}
+        {records.length > 0 && <SummaryCards totais={totais} currency={config.currency} />}
       </div>
     </main>
   )

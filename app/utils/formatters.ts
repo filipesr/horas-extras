@@ -8,10 +8,11 @@ export const formatDateTime = (date: Date): string => {
   })
 }
 
-export const formatCurrency = (value: number): string => {
-  return value.toLocaleString('pt-BR', {
+export const formatCurrency = (value: number, currency: 'BRL' | 'PYG' | 'USD' = 'BRL'): string => {
+  const locale = currency === 'BRL' ? 'pt-BR' : currency === 'PYG' ? 'es-PY' : 'en-US'
+  return value.toLocaleString(locale, {
     style: 'currency',
-    currency: 'BRL',
+    currency: currency,
   })
 }
 
