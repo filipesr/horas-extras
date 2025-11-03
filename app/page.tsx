@@ -29,7 +29,7 @@ interface Config {
 export default function Home() {
   const [config, setConfig] = useState<Config>({
     tipoSalario: 'mensal',
-    valorSalario: 0,
+    valorSalario: 5000,
     horasMensais: 220,
     percentualExtra: 50,
     percentualNoturno: 20,
@@ -38,77 +38,84 @@ export default function Home() {
     fimNoturno: 5,
   })
 
-  const [inputText, setInputText] = useState('')
+  const [inputText, setInputText] = useState(`2025-01-15 12:00 - 16:00
+2025-01-16 13:00 - 19:00
+2025-01-17 17:00 - 18:00`)
   const [records, setRecords] = useState<WorkRecord[]>([])
-  const [somenteExtras, setSomenteExtras] = useState(false)
+  const [somenteExtras, setSomenteExtras] = useState(true)
 
   const valorHora = config.tipoSalario === 'hora'
     ? config.valorSalario
     : config.valorSalario / config.horasMensais
 
   const parseInput = () => {
-    const lines = inputText.trim().split('\n')
-    const parsedRecords: WorkRecord[] = []
-
-    for (const line of lines) {
-      if (!line.trim()) continue
-
-      // Formatos aceitos:
-      // 2024-01-15 08:00 - 17:00
-      // 2024-01-15 08:00, 2024-01-15 17:00
-      // 15/01/2024 08:00 - 17:00
-      // 15/01/2024 08:00, 15/01/2024 17:00
-
-      const patterns = [
-        // ISO format: 2024-01-15 08:00 - 17:00
-        /(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})\s*[-–]\s*(\d{2}:\d{2})/,
-        // ISO format with comma: 2024-01-15 08:00, 2024-01-15 17:00
-        /(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}),\s*(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/,
-        // BR format: 15/01/2024 08:00 - 17:00
-        /(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})\s*[-–]\s*(\d{2}:\d{2})/,
-        // BR format with comma: 15/01/2024 08:00, 15/01/2024 17:00
-        /(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2}),\s*(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})/,
-      ]
-
-      let entrada: Date | null = null
-      let saida: Date | null = null
-
-      for (const pattern of patterns) {
-        const match = line.match(pattern)
-        if (match) {
-          if (pattern === patterns[0]) {
-            // 2024-01-15 08:00 - 17:00
-            entrada = new Date(`${match[1]}T${match[2]}`)
-            saida = new Date(`${match[1]}T${match[3]}`)
-          } else if (pattern === patterns[1]) {
-            // 2024-01-15 08:00, 2024-01-15 17:00
-            entrada = new Date(`${match[1]}T${match[2]}`)
-            saida = new Date(`${match[3]}T${match[4]}`)
-          } else if (pattern === patterns[2]) {
-            // 15/01/2024 08:00 - 17:00
-            entrada = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[4]}`)
-            saida = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[5]}`)
-          } else if (pattern === patterns[3]) {
-            // 15/01/2024 08:00, 15/01/2024 17:00
-            entrada = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[4]}`)
-            saida = new Date(`${match[7]}-${match[6]}-${match[5]}T${match[8]}`)
+    try {
+      const lines = inputText.trim().split('\n')
+      const parsedRecords: WorkRecord[] = []
+  
+      for (const line of lines) {
+        if (!line.trim()) continue
+  
+        // Formatos aceitos:
+        // 2024-01-15 08:00 - 17:00
+        // 2024-01-15 08:00, 2024-01-15 17:00
+        // 15/01/2024 08:00 - 17:00
+        // 15/01/2024 08:00, 15/01/2024 17:00
+  
+        const patterns = [
+          // ISO format: 2024-01-15 08:00 - 17:00
+          /(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})\s*[-–]\s*(\d{2}:\d{2})/,
+          // ISO format with comma: 2024-01-15 08:00, 2024-01-15 17:00
+          /(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}),\s*(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/,
+          // BR format: 15/01/2024 08:00 - 17:00
+          /(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})\s*[-–]\s*(\d{2}:\d{2})/,
+          // BR format with comma: 15/01/2024 08:00, 15/01/2024 17:00
+          /(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2}),\s*(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})/,
+        ]
+  
+        let entrada: Date | null = null
+        let saida: Date | null = null
+  
+        for (const pattern of patterns) {
+          const match = line.match(pattern)
+          if (match) {
+            if (pattern === patterns[0]) {
+              // 2024-01-15 08:00 - 17:00
+              entrada = new Date(`${match[1]}T${match[2]}`)
+              saida = new Date(`${match[1]}T${match[3]}`)
+            } else if (pattern === patterns[1]) {
+              // 2024-01-15 08:00, 2024-01-15 17:00
+              entrada = new Date(`${match[1]}T${match[2]}`)
+              saida = new Date(`${match[3]}T${match[4]}`)
+            } else if (pattern === patterns[2]) {
+              // 15/01/2024 08:00 - 17:00
+              entrada = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[4]}`)
+              saida = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[5]}`)
+            } else if (pattern === patterns[3]) {
+              // 15/01/2024 08:00, 15/01/2024 17:00
+              entrada = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[4]}`)
+              saida = new Date(`${match[7]}-${match[6]}-${match[5]}T${match[8]}`)
+            }
+            break
           }
-          break
+        }
+  
+        if (entrada && saida && !isNaN(entrada.getTime()) && !isNaN(saida.getTime())) {
+          // Se saída é antes da entrada, assumir que é no dia seguinte
+          if (saida < entrada) {
+            saida = new Date(saida.getTime() + 24 * 60 * 60 * 1000)
+          }
+  
+          const record = calculateRecord(entrada, saida)
+          parsedRecords.push(record)
         }
       }
-
-      if (entrada && saida && !isNaN(entrada.getTime()) && !isNaN(saida.getTime())) {
-        // Se saída é antes da entrada, assumir que é no dia seguinte
-        if (saida < entrada) {
-          saida = new Date(saida.getTime() + 24 * 60 * 60 * 1000)
-        }
-
-        const record = calculateRecord(entrada, saida)
-        parsedRecords.push(record)
-      }
+  
+      setRecords(parsedRecords)
+      
+    } catch (error) {
+      console.error(error);
     }
-
-    setRecords(parsedRecords)
   }
 
   const isHorarioNoturno = (hora: number): boolean => {
