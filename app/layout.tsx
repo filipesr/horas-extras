@@ -13,6 +13,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `console.log('Layout JS loaded', new Date().toISOString());`,
+          }}
+        />
+      </head>
       <body className="font-sans">{children}</body>
     </html>
   )

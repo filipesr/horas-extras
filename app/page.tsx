@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface WorkRecord {
   id: string
@@ -43,82 +43,18 @@ export default function Home() {
 2025-01-17 17:00 - 18:00`)
   const [records, setRecords] = useState<WorkRecord[]>([])
   const [somenteExtras, setSomenteExtras] = useState(true)
+  const [error, setError] = useState<string>('')
+
+  useEffect(() => {
+    console.log('Component mounted successfully')
+    console.log('React is running')
+  }, [])
 
   const valorHora = config.tipoSalario === 'hora'
     ? config.valorSalario
     : config.valorSalario / config.horasMensais
 
-  const parseInput = () => {
-    try {
-      const lines = inputText.trim().split('\n')
-      const parsedRecords: WorkRecord[] = []
-  
-      for (const line of lines) {
-        if (!line.trim()) continue
-  
-        // Formatos aceitos:
-        // 2024-01-15 08:00 - 17:00
-        // 2024-01-15 08:00, 2024-01-15 17:00
-        // 15/01/2024 08:00 - 17:00
-        // 15/01/2024 08:00, 15/01/2024 17:00
-  
-        const patterns = [
-          // ISO format: 2024-01-15 08:00 - 17:00
-          /(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})\s*[-–]\s*(\d{2}:\d{2})/,
-          // ISO format with comma: 2024-01-15 08:00, 2024-01-15 17:00
-          /(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}),\s*(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/,
-          // BR format: 15/01/2024 08:00 - 17:00
-          /(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})\s*[-–]\s*(\d{2}:\d{2})/,
-          // BR format with comma: 15/01/2024 08:00, 15/01/2024 17:00
-          /(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2}),\s*(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})/,
-        ]
-  
-        let entrada: Date | null = null
-        let saida: Date | null = null
-  
-        for (const pattern of patterns) {
-          const match = line.match(pattern)
-          if (match) {
-            if (pattern === patterns[0]) {
-              // 2024-01-15 08:00 - 17:00
-              entrada = new Date(`${match[1]}T${match[2]}`)
-              saida = new Date(`${match[1]}T${match[3]}`)
-            } else if (pattern === patterns[1]) {
-              // 2024-01-15 08:00, 2024-01-15 17:00
-              entrada = new Date(`${match[1]}T${match[2]}`)
-              saida = new Date(`${match[3]}T${match[4]}`)
-            } else if (pattern === patterns[2]) {
-              // 15/01/2024 08:00 - 17:00
-              entrada = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[4]}`)
-              saida = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[5]}`)
-            } else if (pattern === patterns[3]) {
-              // 15/01/2024 08:00, 15/01/2024 17:00
-              entrada = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[4]}`)
-              saida = new Date(`${match[7]}-${match[6]}-${match[5]}T${match[8]}`)
-            }
-            break
-          }
-        }
-  
-        if (entrada && saida && !isNaN(entrada.getTime()) && !isNaN(saida.getTime())) {
-          // Se saída é antes da entrada, assumir que é no dia seguinte
-          if (saida < entrada) {
-            saida = new Date(saida.getTime() + 24 * 60 * 60 * 1000)
-          }
-  
-          const record = calculateRecord(entrada, saida)
-          parsedRecords.push(record)
-        }
-      }
-  
-      setRecords(parsedRecords)
-      
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  const isHorarioNoturno = (hora: number): boolean => {
+  const isHorarioNoturno = useCallback((hora: number): boolean => {
     if (config.inicioNoturno > config.fimNoturno) {
       // Ex: 22h às 5h (cruza meia-noite)
       return hora >= config.inicioNoturno || hora < config.fimNoturno
@@ -126,9 +62,9 @@ export default function Home() {
       // Ex: 0h às 6h
       return hora >= config.inicioNoturno && hora < config.fimNoturno
     }
-  }
+  }, [config.inicioNoturno, config.fimNoturno])
 
-  const calculateRecord = (entrada: Date, saida: Date): WorkRecord => {
+  const calculateRecord = useCallback((entrada: Date, saida: Date): WorkRecord => {
     const diffMs = saida.getTime() - entrada.getTime()
     const horasTrabalhadas = diffMs / (1000 * 60 * 60)
 
@@ -175,7 +111,97 @@ export default function Home() {
       valorNoturno,
       valorTotal,
     }
-  }
+  }, [config.horasDiarias, config.percentualExtra, config.percentualNoturno, isHorarioNoturno, somenteExtras, valorHora])
+
+  const parseInput = useCallback(() => {
+    console.log('parseInput called') // Debug log
+    console.log('inputText value:', inputText)
+    console.log('inputText length:', inputText.length)
+    setError('') // Clear previous errors
+
+    try {
+      const lines = inputText.trim().split('\n')
+      console.log('Number of lines:', lines.length)
+      const parsedRecords: WorkRecord[] = []
+
+      for (const line of lines) {
+        if (!line.trim()) continue
+        console.log('Processing line:', line)
+
+        // Formatos aceitos:
+        // 2024-01-15 08:00 - 17:00
+        // 2024-01-15 08:00, 2024-01-15 17:00
+        // 15/01/2024 08:00 - 17:00
+        // 15/01/2024 08:00, 15/01/2024 17:00
+
+        const patterns = [
+          // ISO format: 2024-01-15 08:00 - 17:00
+          /(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})\s*[-–]\s*(\d{2}:\d{2})/,
+          // ISO format with comma: 2024-01-15 08:00, 2024-01-15 17:00
+          /(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}),\s*(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/,
+          // BR format: 15/01/2024 08:00 - 17:00
+          /(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})\s*[-–]\s*(\d{2}:\d{2})/,
+          // BR format with comma: 15/01/2024 08:00, 15/01/2024 17:00
+          /(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2}),\s*(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})/,
+        ]
+
+        let entrada: Date | null = null
+        let saida: Date | null = null
+
+        for (let i = 0; i < patterns.length; i++) {
+          const pattern = patterns[i]
+          const match = line.match(pattern)
+          if (match) {
+            console.log('Pattern matched:', pattern, 'matches:', match)
+            if (i === 0) {
+              // 2024-01-15 08:00 - 17:00
+              entrada = new Date(`${match[1]}T${match[2]}`)
+              saida = new Date(`${match[1]}T${match[3]}`)
+            } else if (i === 1) {
+              // 2024-01-15 08:00, 2024-01-15 17:00
+              entrada = new Date(`${match[1]}T${match[2]}`)
+              saida = new Date(`${match[3]}T${match[4]}`)
+            } else if (i === 2) {
+              // 15/01/2024 08:00 - 17:00
+              entrada = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[4]}`)
+              saida = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[5]}`)
+            } else if (i === 3) {
+              // 15/01/2024 08:00, 15/01/2024 17:00
+              entrada = new Date(`${match[3]}-${match[2]}-${match[1]}T${match[4]}`)
+              saida = new Date(`${match[7]}-${match[6]}-${match[5]}T${match[8]}`)
+            }
+            console.log('Parsed dates - entrada:', entrada, 'saida:', saida)
+            console.log('Valid dates?', entrada && !isNaN(entrada.getTime()), saida && !isNaN(saida.getTime()))
+            break
+          }
+        }
+
+        if (!entrada || !saida) {
+          console.log('No pattern matched for line:', line)
+        }
+
+        if (entrada && saida && !isNaN(entrada.getTime()) && !isNaN(saida.getTime())) {
+          console.log('Adding record to results')
+          // Se saída é antes da entrada, assumir que é no dia seguinte
+          if (saida < entrada) {
+            saida = new Date(saida.getTime() + 24 * 60 * 60 * 1000)
+          }
+
+          const record = calculateRecord(entrada, saida)
+          parsedRecords.push(record)
+        } else if (entrada || saida) {
+          console.log('Invalid dates - entrada:', entrada, 'saida:', saida)
+        }
+      }
+
+      setRecords(parsedRecords)
+      console.log('parseInput completed successfully', parsedRecords.length, 'records') // Debug log
+
+    } catch (error) {
+      console.error('Error in parseInput:', error)
+      setError(`Erro ao processar os dados: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+    }
+  }, [inputText, calculateRecord])
 
   const totais = records.reduce(
     (acc, record) => ({
@@ -403,11 +429,25 @@ export default function Home() {
           />
 
           <button
-            onClick={parseInput}
+            type="button"
+            onClick={(e) => {
+              console.log('Button clicked!', e)
+              parseInput()
+            }}
+            onMouseDown={() => console.log('Button mousedown')}
+            data-testid="calculate-button"
             className="mt-4 w-full md:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
           >
             Calcular Horas
           </button>
+
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                <strong>Erro:</strong> {error}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Tabela de Registros */}
