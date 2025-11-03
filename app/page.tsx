@@ -43,25 +43,29 @@ export default function Home() {
 2025-01-17 17:00 - 18:00`)
   const [records, setRecords] = useState<WorkRecord[]>([])
   const [somenteExtras, setSomenteExtras] = useState(true)
+  const [error, setError] = useState<string>('')
 
   const valorHora = config.tipoSalario === 'hora'
     ? config.valorSalario
     : config.valorSalario / config.horasMensais
 
   const parseInput = () => {
+    console.log('parseInput called') // Debug log
+    setError('') // Clear previous errors
+
     try {
       const lines = inputText.trim().split('\n')
       const parsedRecords: WorkRecord[] = []
-  
+
       for (const line of lines) {
         if (!line.trim()) continue
-  
+
         // Formatos aceitos:
         // 2024-01-15 08:00 - 17:00
         // 2024-01-15 08:00, 2024-01-15 17:00
         // 15/01/2024 08:00 - 17:00
         // 15/01/2024 08:00, 15/01/2024 17:00
-  
+
         const patterns = [
           // ISO format: 2024-01-15 08:00 - 17:00
           /(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})\s*[-–]\s*(\d{2}:\d{2})/,
@@ -72,10 +76,10 @@ export default function Home() {
           // BR format with comma: 15/01/2024 08:00, 15/01/2024 17:00
           /(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2}),\s*(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2})/,
         ]
-  
+
         let entrada: Date | null = null
         let saida: Date | null = null
-  
+
         for (const pattern of patterns) {
           const match = line.match(pattern)
           if (match) {
@@ -99,22 +103,24 @@ export default function Home() {
             break
           }
         }
-  
+
         if (entrada && saida && !isNaN(entrada.getTime()) && !isNaN(saida.getTime())) {
           // Se saída é antes da entrada, assumir que é no dia seguinte
           if (saida < entrada) {
             saida = new Date(saida.getTime() + 24 * 60 * 60 * 1000)
           }
-  
+
           const record = calculateRecord(entrada, saida)
           parsedRecords.push(record)
         }
       }
-  
+
       setRecords(parsedRecords)
-      
+      console.log('parseInput completed successfully', parsedRecords.length, 'records') // Debug log
+
     } catch (error) {
-      console.error(error);
+      console.error('Error in parseInput:', error)
+      setError(`Erro ao processar os dados: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
     }
   }
 
@@ -403,11 +409,20 @@ export default function Home() {
           />
 
           <button
+            type="button"
             onClick={parseInput}
             className="mt-4 w-full md:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
           >
             Calcular Horas
           </button>
+
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                <strong>Erro:</strong> {error}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Tabela de Registros */}
