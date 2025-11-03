@@ -58,11 +58,7 @@ export default function InputSection({
 
       <button
         type="button"
-        onClick={(e) => {
-          console.log('Button clicked!', e)
-          onCalculate()
-        }}
-        onMouseDown={() => console.log('Button mousedown')}
+        onClick={onCalculate}
         data-testid="calculate-button"
         className="mt-4 w-full md:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
       >

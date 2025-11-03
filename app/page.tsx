@@ -12,7 +12,7 @@ import SummaryCards from './components/SummaryCards'
 export default function Home() {
   const [config, setConfig] = useState<Config>({
     tipoSalario: 'mensal',
-    valorSalario: 5000,
+    valorSalario: 0,
     horasMensais: 220,
     currency: 'BRL',
     percentualExtra: 50,
@@ -27,17 +27,10 @@ export default function Home() {
     sabadosLivres: [],
   })
 
-  const [inputText, setInputText] = useState(`2025-01-15 12:00 - 16:00
-2025-01-16 13:00 - 19:00
-2025-01-17 17:00 - 18:00`)
+  const [inputText, setInputText] = useState(``)
   const [records, setRecords] = useState<WorkRecord[]>([])
   const [somenteExtras, setSomenteExtras] = useState(true)
   const [error, setError] = useState<string>('')
-
-  useEffect(() => {
-    console.log('Component mounted successfully')
-    console.log('React is running')
-  }, [])
 
   const valorHora =
     config.tipoSalario === 'hora'
@@ -45,7 +38,6 @@ export default function Home() {
       : config.valorSalario / config.horasMensais
 
   const parseInput = useCallback(() => {
-    console.log('parseInput called')
     setError('')
 
     try {
@@ -56,9 +48,7 @@ export default function Home() {
       )
 
       setRecords(calculatedRecords)
-      console.log('parseInput completed successfully', calculatedRecords.length, 'records')
     } catch (error) {
-      console.error('Error in parseInput:', error)
       setError(
         `Erro ao processar os dados: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
       )

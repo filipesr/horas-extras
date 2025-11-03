@@ -93,14 +93,11 @@ export const parseLine = (line: string): ParsedDate => {
   for (const { regex, parser } of patterns) {
     const match = line.match(regex)
     if (match) {
-      console.log('Pattern matched:', regex, 'matches:', match)
       const result = parser(match)
-      console.log('Parsed dates - entrada:', result.entrada, 'saida:', result.saida)
       return result
     }
   }
 
-  console.log('No pattern matched for line:', line)
   return { entrada: null, saida: null }
 }
 
@@ -108,24 +105,16 @@ export const parseLine = (line: string): ParsedDate => {
  * Parse o texto de input e retorna um array de registros parciais (sem cálculos)
  */
 export const parseInputText = (inputText: string): Array<{ entrada: Date; saida: Date }> => {
-  console.log('parseInputText called')
-  console.log('inputText value:', inputText)
-  console.log('inputText length:', inputText.length)
-
   const lines = inputText.trim().split('\n')
-  console.log('Number of lines:', lines.length)
 
   const parsedRecords: Array<{ entrada: Date; saida: Date }> = []
 
   for (const line of lines) {
     if (!line.trim()) continue
-    console.log('Processing line:', line)
 
     const { entrada, saida } = parseLine(line)
 
     if (entrada && saida && !isNaN(entrada.getTime()) && !isNaN(saida.getTime())) {
-      console.log('Adding record to results')
-
       // Se saída é antes da entrada, assumir que é no dia seguinte
       let finalSaida = saida
       if (saida < entrada) {
@@ -138,6 +127,5 @@ export const parseInputText = (inputText: string): Array<{ entrada: Date; saida:
     }
   }
 
-  console.log('parseInputText completed successfully', parsedRecords.length, 'records')
   return parsedRecords
 }
