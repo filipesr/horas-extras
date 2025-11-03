@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface WorkRecord {
   id: string
@@ -45,11 +45,75 @@ export default function Home() {
   const [somenteExtras, setSomenteExtras] = useState(true)
   const [error, setError] = useState<string>('')
 
+  useEffect(() => {
+    console.log('Component mounted successfully')
+    console.log('React is running')
+  }, [])
+
   const valorHora = config.tipoSalario === 'hora'
     ? config.valorSalario
     : config.valorSalario / config.horasMensais
 
-  const parseInput = () => {
+  const isHorarioNoturno = useCallback((hora: number): boolean => {
+    if (config.inicioNoturno > config.fimNoturno) {
+      // Ex: 22h às 5h (cruza meia-noite)
+      return hora >= config.inicioNoturno || hora < config.fimNoturno
+    } else {
+      // Ex: 0h às 6h
+      return hora >= config.inicioNoturno && hora < config.fimNoturno
+    }
+  }, [config.inicioNoturno, config.fimNoturno])
+
+  const calculateRecord = useCallback((entrada: Date, saida: Date): WorkRecord => {
+    const diffMs = saida.getTime() - entrada.getTime()
+    const horasTrabalhadas = diffMs / (1000 * 60 * 60)
+
+    // Calcular horas noturnas
+    let horasNoturnas = 0
+    let currentTime = new Date(entrada)
+
+    while (currentTime < saida) {
+      const hora = currentTime.getHours() + currentTime.getMinutes() / 60
+      if (isHorarioNoturno(Math.floor(hora))) {
+        const nextHour = new Date(currentTime.getTime() + 60 * 60 * 1000)
+        const endCheck = nextHour < saida ? nextHour : saida
+        horasNoturnas += (endCheck.getTime() - currentTime.getTime()) / (1000 * 60 * 60)
+        currentTime = nextHour
+      } else {
+        currentTime = new Date(currentTime.getTime() + 60 * 60 * 1000)
+      }
+    }
+
+    // Calcular horas extras (acima da jornada diária)
+    let horasExtras = 0
+    if (somenteExtras) {
+      horasExtras = horasTrabalhadas
+    } else {
+      horasExtras = Math.max(0, horasTrabalhadas - config.horasDiarias)
+    }
+
+    // Calcular valores
+    const horasNormais = horasTrabalhadas - horasExtras
+    const valorNormal = horasNormais * valorHora
+    const valorExtra = horasExtras * valorHora * (1 + config.percentualExtra / 100)
+    const valorNoturno = horasNoturnas * valorHora * (config.percentualNoturno / 100)
+    const valorTotal = valorNormal + valorExtra + valorNoturno
+
+    return {
+      id: `${entrada.getTime()}-${saida.getTime()}`,
+      entrada,
+      saida,
+      horasTrabalhadas,
+      horasExtras,
+      horasNoturnas,
+      valorNormal,
+      valorExtra,
+      valorNoturno,
+      valorTotal,
+    }
+  }, [config.horasDiarias, config.percentualExtra, config.percentualNoturno, isHorarioNoturno, somenteExtras, valorHora])
+
+  const parseInput = useCallback(() => {
     console.log('parseInput called') // Debug log
     setError('') // Clear previous errors
 
@@ -122,66 +186,7 @@ export default function Home() {
       console.error('Error in parseInput:', error)
       setError(`Erro ao processar os dados: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
     }
-  }
-
-  const isHorarioNoturno = (hora: number): boolean => {
-    if (config.inicioNoturno > config.fimNoturno) {
-      // Ex: 22h às 5h (cruza meia-noite)
-      return hora >= config.inicioNoturno || hora < config.fimNoturno
-    } else {
-      // Ex: 0h às 6h
-      return hora >= config.inicioNoturno && hora < config.fimNoturno
-    }
-  }
-
-  const calculateRecord = (entrada: Date, saida: Date): WorkRecord => {
-    const diffMs = saida.getTime() - entrada.getTime()
-    const horasTrabalhadas = diffMs / (1000 * 60 * 60)
-
-    // Calcular horas noturnas
-    let horasNoturnas = 0
-    let currentTime = new Date(entrada)
-
-    while (currentTime < saida) {
-      const hora = currentTime.getHours() + currentTime.getMinutes() / 60
-      if (isHorarioNoturno(Math.floor(hora))) {
-        const nextHour = new Date(currentTime.getTime() + 60 * 60 * 1000)
-        const endCheck = nextHour < saida ? nextHour : saida
-        horasNoturnas += (endCheck.getTime() - currentTime.getTime()) / (1000 * 60 * 60)
-        currentTime = nextHour
-      } else {
-        currentTime = new Date(currentTime.getTime() + 60 * 60 * 1000)
-      }
-    }
-
-    // Calcular horas extras (acima da jornada diária)
-    let horasExtras = 0
-    if (somenteExtras) {
-      horasExtras = horasTrabalhadas
-    } else {
-      horasExtras = Math.max(0, horasTrabalhadas - config.horasDiarias)
-    }
-
-    // Calcular valores
-    const horasNormais = horasTrabalhadas - horasExtras
-    const valorNormal = horasNormais * valorHora
-    const valorExtra = horasExtras * valorHora * (1 + config.percentualExtra / 100)
-    const valorNoturno = horasNoturnas * valorHora * (config.percentualNoturno / 100)
-    const valorTotal = valorNormal + valorExtra + valorNoturno
-
-    return {
-      id: `${entrada.getTime()}-${saida.getTime()}`,
-      entrada,
-      saida,
-      horasTrabalhadas,
-      horasExtras,
-      horasNoturnas,
-      valorNormal,
-      valorExtra,
-      valorNoturno,
-      valorTotal,
-    }
-  }
+  }, [inputText, calculateRecord])
 
   const totais = records.reduce(
     (acc, record) => ({
@@ -410,7 +415,12 @@ export default function Home() {
 
           <button
             type="button"
-            onClick={parseInput}
+            onClick={(e) => {
+              console.log('Button clicked!', e)
+              parseInput()
+            }}
+            onMouseDown={() => console.log('Button mousedown')}
+            data-testid="calculate-button"
             className="mt-4 w-full md:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
           >
             Calcular Horas
