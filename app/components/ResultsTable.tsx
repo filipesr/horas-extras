@@ -69,23 +69,41 @@ export default function ResultsTable({ records, totais, currency }: ResultsTable
               <th className="px-2 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
                 Tipo
               </th>
-              <th className="px-2 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Hs Totais → Vlr Normal
+              <th className="px-2 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
+                <div className="flex flex-col items-center">
+                  <span>Normal</span>
+                  <span className="text-[10px] font-normal">horas → valor</span>
+                </div>
               </th>
-              <th className="px-2 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Hs Extras → Vlr Extra
+              <th className="px-2 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
+                <div className="flex flex-col items-center">
+                  <span>Extra</span>
+                  <span className="text-[10px] font-normal">horas → valor</span>
+                </div>
               </th>
-              <th className="px-2 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Hs Noturnas → Vlr Noturno
+              <th className="px-2 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
+                <div className="flex flex-col items-center">
+                  <span>Noturno</span>
+                  <span className="text-[10px] font-normal">horas → valor</span>
+                </div>
               </th>
-              <th className="px-2 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Vlr Domingo
+              <th className="px-2 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
+                <div className="flex flex-col items-center">
+                  <span>Domingo</span>
+                  <span className="text-[10px] font-normal">valor</span>
+                </div>
               </th>
-              <th className="px-2 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Vlr Feriado
+              <th className="px-2 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
+                <div className="flex flex-col items-center">
+                  <span>Feriado</span>
+                  <span className="text-[10px] font-normal">valor</span>
+                </div>
               </th>
-              <th className="px-2 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Vlr Total
+              <th className="px-2 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
+                <div className="flex flex-col items-center">
+                  <span>Total</span>
+                  <span className="text-[10px] font-normal">valor</span>
+                </div>
               </th>
             </tr>
           </thead>
@@ -105,26 +123,26 @@ export default function ResultsTable({ records, totais, currency }: ResultsTable
                 <td className={`px-2 py-2 text-xs text-center font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap ${getTipoDiaColor(record.tipoDia)}`}>
                   {getTipoDiaLabel(record.tipoDia)}
                 </td>
-                <td className="px-2 py-2 text-xs text-right text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                <td className="px-2 py-2 text-xs text-center text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                   {formatHours(record.horasTrabalhadas)} → {formatCurrency(record.valorNormal, currency)}
                 </td>
-                <td className="px-2 py-2 text-xs text-right text-orange-600 dark:text-orange-400 font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                <td className="px-2 py-2 text-xs text-center text-orange-600 dark:text-orange-400 font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                   {record.horasExtras > 0
                     ? `${formatHours(record.horasExtras)} → ${formatCurrency(record.valorExtra, currency)}`
                     : '-'}
                 </td>
-                <td className="px-2 py-2 text-xs text-right text-purple-600 dark:text-purple-400 font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                <td className="px-2 py-2 text-xs text-center text-purple-600 dark:text-purple-400 font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                   {record.horasNoturnas > 0
                     ? `${formatHours(record.horasNoturnas)} → ${formatCurrency(record.valorNoturno, currency)}`
                     : '-'}
                 </td>
-                <td className="px-2 py-2 text-xs text-right text-red-600 dark:text-red-400 font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                <td className="px-2 py-2 text-xs text-center text-red-600 dark:text-red-400 font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                   {record.valorDomingo > 0 ? formatCurrency(record.valorDomingo, currency) : '-'}
                 </td>
-                <td className="px-2 py-2 text-xs text-right text-pink-600 dark:text-pink-400 font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                <td className="px-2 py-2 text-xs text-center text-pink-600 dark:text-pink-400 font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                   {record.valorFeriado > 0 ? formatCurrency(record.valorFeriado, currency) : '-'}
                 </td>
-                <td className="px-2 py-2 text-xs text-right font-semibold text-green-600 dark:text-green-400 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                <td className="px-2 py-2 text-xs text-center font-semibold text-green-600 dark:text-green-400 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                   {formatCurrency(record.valorTotal, currency)}
                 </td>
               </tr>
@@ -138,22 +156,22 @@ export default function ResultsTable({ records, totais, currency }: ResultsTable
               >
                 TOTAIS
               </td>
-              <td className="px-2 py-3 text-xs text-right text-gray-800 dark:text-gray-200 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
+              <td className="px-2 py-3 text-xs text-center text-gray-800 dark:text-gray-200 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
                 {formatHours(totais.horasTrabalhadas)} → {formatCurrency(totais.valorNormal, currency)}
               </td>
-              <td className="px-2 py-3 text-xs text-right text-orange-700 dark:text-orange-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
+              <td className="px-2 py-3 text-xs text-center text-orange-700 dark:text-orange-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
                 {formatHours(totais.horasExtras)} → {formatCurrency(totais.valorExtra, currency)}
               </td>
-              <td className="px-2 py-3 text-xs text-right text-purple-700 dark:text-purple-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
+              <td className="px-2 py-3 text-xs text-center text-purple-700 dark:text-purple-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
                 {formatHours(totais.horasNoturnas)} → {formatCurrency(totais.valorNoturno, currency)}
               </td>
-              <td className="px-2 py-3 text-xs text-right text-red-700 dark:text-red-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
+              <td className="px-2 py-3 text-xs text-center text-red-700 dark:text-red-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
                 {totais.valorDomingo > 0 ? formatCurrency(totais.valorDomingo, currency) : '-'}
               </td>
-              <td className="px-2 py-3 text-xs text-right text-pink-700 dark:text-pink-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
+              <td className="px-2 py-3 text-xs text-center text-pink-700 dark:text-pink-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
                 {totais.valorFeriado > 0 ? formatCurrency(totais.valorFeriado, currency) : '-'}
               </td>
-              <td className="px-2 py-3 text-xs text-right text-green-700 dark:text-green-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
+              <td className="px-2 py-3 text-xs text-center text-green-700 dark:text-green-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
                 {formatCurrency(totais.valorTotal, currency)}
               </td>
             </tr>

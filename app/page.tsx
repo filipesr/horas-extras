@@ -90,46 +90,117 @@ export default function Home() {
           Calculadora de Horas Extras
         </h1>
 
-        {/* Seção de Salário e Configurações - Não imprime */}
+        {/* Seção de Salário - Não imprime */}
         <div className="mb-8 print:hidden">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-            <div>
-              <h2 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Salário Configurado
-              </h2>
-              <div className="space-y-1">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>Tipo:</strong>{' '}
-                  {config.tipoSalario === 'hora' ? 'Por Hora' : 'Mensal'}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>Valor:</strong> {formatCurrency(config.valorSalario, config.currency)}
-                </p>
+          <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4">
+            <div className="flex flex-col lg:flex-row items-start lg:items-end gap-4">
+              {/* Campos de Salário */}
+              <div className="flex-1 w-full">
+                <h2 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Configuração de Salário
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Tipo de Salário */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Tipo de Salário
+                    </label>
+                    <select
+                      value={config.tipoSalario}
+                      onChange={(e) =>
+                        setConfig({ ...config, tipoSalario: e.target.value as 'hora' | 'mensal' })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
+                    >
+                      <option value="hora">Por Hora</option>
+                      <option value="mensal">Mensal</option>
+                    </select>
+                  </div>
+
+                  {/* Moeda */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Moeda
+                    </label>
+                    <select
+                      value={config.currency}
+                      onChange={(e) =>
+                        setConfig({ ...config, currency: e.target.value as 'BRL' | 'PYG' | 'USD' })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
+                    >
+                      <option value="BRL">BRL (R$)</option>
+                      <option value="PYG">PYG (₲)</option>
+                      <option value="USD">USD ($)</option>
+                    </select>
+                  </div>
+
+                  {/* Valor do Salário */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Valor do Salário
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={config.valorSalario}
+                      onChange={(e) =>
+                        setConfig({ ...config, valorSalario: parseFloat(e.target.value) || 0 })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  {/* Horas Mensais */}
+                  {config.tipoSalario === 'mensal' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Horas Mensais
+                      </label>
+                      <input
+                        type="number"
+                        value={config.horasMensais}
+                        onChange={(e) =>
+                          setConfig({ ...config, horasMensais: parseInt(e.target.value) || 0 })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
+                        placeholder="220"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Valor da hora calculado */}
                 {valorHora > 0 && (
-                  <p className="text-sm text-primary-800 dark:text-primary-200">
-                    <strong>Valor da hora:</strong> {formatCurrency(valorHora, config.currency)}
-                  </p>
+                  <div className="mt-3 p-3 bg-white dark:bg-gray-700 rounded-lg border border-primary-200 dark:border-primary-700">
+                    <p className="text-sm text-primary-800 dark:text-primary-200">
+                      <strong>Valor da hora:</strong> {formatCurrency(valorHora, config.currency)}
+                    </p>
+                  </div>
                 )}
               </div>
-            </div>
-            <button
-              onClick={() => setIsConfigModalOpen(true)}
-              className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+
+              {/* Botão de Configurações Avançadas */}
+              <button
+                onClick={() => setIsConfigModalOpen(true)}
+                className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg flex items-center gap-2 whitespace-nowrap"
               >
-                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              Configurações
-            </button>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Config. Avançadas
+              </button>
+            </div>
           </div>
         </div>
 
