@@ -169,17 +169,17 @@ const calculateSingleDayRecord = (
 
   // Lógica específica por tipo de dia
   if (tipoDia === 'domingo') {
-    // Domingo: adicional de 100% sobre TODAS as horas (não separa extra)
-    valorDomingo = horasTrabalhadas * valorHora * (config.percentualDomingo / 100)
+    // Domingo: valor normal + adicional de 100% vai para "Extra"
     valorNormal = horasTrabalhadas * valorHora
-    // Não calcula valorExtra para domingo
+    valorExtra = horasTrabalhadas * valorHora * (config.percentualDomingo / 100)
+    valorDomingo = valorExtra // Mantém para compatibilidade nos totais
   } else if (tipoDia === 'feriado') {
-    // Feriado: adicional sobre TODAS as horas (não separa extra)
-    valorFeriado = horasTrabalhadas * valorHora * (config.percentualFeriado / 100)
+    // Feriado: valor normal + adicional de 100% vai para "Extra"
     valorNormal = horasTrabalhadas * valorHora
-    // Não calcula valorExtra para feriado
+    valorExtra = horasTrabalhadas * valorHora * (config.percentualFeriado / 100)
+    valorFeriado = valorExtra // Mantém para compatibilidade nos totais
   } else if (tipoDia === 'sabado-livre') {
-    // Sábado livre: adicional de 50% sobre TODAS as horas (não é hora extra, é adicional fixo)
+    // Sábado livre: adicional de 50% sobre TODAS as horas vai para "Extra"
     valorNormal = horasTrabalhadas * valorHora
     valorExtra = horasTrabalhadas * valorHora * 0.5 // 50% sobre todas as horas
   } else {
@@ -188,7 +188,7 @@ const calculateSingleDayRecord = (
     valorExtra = horasExtras * valorHora * (1 + config.percentualExtra / 100)
   }
 
-  const valorTotal = valorNormal + valorExtra + valorNoturno + valorDomingo + valorFeriado
+  const valorTotal = valorNormal + valorExtra + valorNoturno
 
   return {
     id: `${entrada.getTime()}-${saida.getTime()}`,
