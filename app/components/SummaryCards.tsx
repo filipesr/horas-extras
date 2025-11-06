@@ -34,28 +34,6 @@ export default function SummaryCards({ totais, currency }: SummaryCardsProps) {
           </p>
         </div>
 
-        {totais.valorDomingo > 0 && (
-          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-red-800 dark:text-red-300 mb-2">
-              Adicional Domingo
-            </h3>
-            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-              {formatCurrency(totais.valorDomingo, currency)}
-            </p>
-          </div>
-        )}
-
-        {totais.valorFeriado > 0 && (
-          <div className="bg-pink-50 dark:bg-pink-900/20 border-2 border-pink-200 dark:border-pink-800 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-pink-800 dark:text-pink-300 mb-2">
-              Adicional Feriado
-            </h3>
-            <p className="text-2xl font-bold text-pink-600 dark:text-pink-400">
-              {formatCurrency(totais.valorFeriado, currency)}
-            </p>
-          </div>
-        )}
-
         <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-lg p-4">
           <h3 className="text-sm font-medium text-green-800 dark:text-green-300 mb-2">
             Valor Total Geral

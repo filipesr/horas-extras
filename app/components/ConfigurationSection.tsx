@@ -33,17 +33,13 @@ export default function ConfigurationSection({
   }
 
   return (
-    <div className="mb-8">
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
-        Configurações
-      </h2>
-
+    <div>
       {/* Seção: Salário */}
       <div className="mb-6">
         <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-300">
-          Salário
+          Configurações de Salário
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Tipo de Salário */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -77,23 +73,6 @@ export default function ConfigurationSection({
               <option value="PYG">PYG (₲)</option>
               <option value="USD">USD ($)</option>
             </select>
-          </div>
-
-          {/* Valor do Salário */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Valor do Salário
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              value={config.valorSalario}
-              onChange={(e) =>
-                setConfig({ ...config, valorSalario: parseFloat(e.target.value) || 0 })
-              }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              placeholder="0.00"
-            />
           </div>
 
           {/* Horas Mensais */}
@@ -308,13 +287,6 @@ export default function ConfigurationSection({
         </div>
       </div>
 
-      {valorHora > 0 && (
-        <div className="mt-4 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-          <p className="text-sm text-primary-800 dark:text-primary-200">
-            <strong>Valor da hora:</strong> {formatCurrency(valorHora, config.currency)}
-          </p>
-        </div>
-      )}
     </div>
   )
 }
