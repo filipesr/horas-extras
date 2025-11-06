@@ -18,7 +18,7 @@ export default function Home() {
     horasMensais: 220,
     currency: 'BRL',
     percentualExtra: 50,
-    percentualNoturno: 20,
+    percentualNoturno: 30,
     percentualDomingo: 100,
     percentualFeriado: 100,
     horasDiarias: 8,
