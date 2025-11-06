@@ -46,9 +46,11 @@ export default function Home() {
     try {
       const parsedRecords = parseInputText(inputText)
 
-      const calculatedRecords = parsedRecords.map(({ entrada, saida }) =>
-        calculateRecord(entrada, saida, config, somenteExtras)
-      )
+      const calculatedRecords = parsedRecords.flatMap(({ entrada, saida }) => {
+        const result = calculateRecord(entrada, saida, config, somenteExtras)
+        // calculateRecord pode retornar um único registro ou array de registros (quando cruza dias)
+        return Array.isArray(result) ? result : [result]
+      })
 
       setRecords(calculatedRecords)
     } catch (error) {
@@ -92,79 +94,67 @@ export default function Home() {
 
         {/* Seção de Salário - Não imprime */}
         <div className="mb-8 print:hidden">
-          <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4">
-            <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
-              {/* Informações e Input de Salário */}
-              <div className="flex-1">
-                <h2 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Salário
-                </h2>
-                <div className="flex flex-col md:flex-row gap-4 items-start md:items-end">
-                  {/* Informações do Salário */}
-                  <div className="flex-1 p-3 bg-white dark:bg-gray-700 rounded-lg border border-primary-200 dark:border-primary-700">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Tipo</p>
-                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                          {config.tipoSalario === 'hora' ? 'Por Hora' : 'Mensal'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Moeda</p>
-                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                          {config.currency === 'BRL' ? 'BRL (R$)' : config.currency === 'PYG' ? 'PYG (₲)' : 'USD ($)'}
-                        </p>
-                      </div>
-                      {valorHora > 0 && (
-                        <div className="col-span-2 pt-2 border-t border-primary-100 dark:border-primary-800">
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Valor da Hora</p>
-                          <p className="text-sm font-semibold text-primary-800 dark:text-primary-200">
-                            {formatCurrency(valorHora, config.currency)}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Input do Valor do Salário */}
-                  <div className="w-full md:w-64">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Valor do Salário
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={config.valorSalario}
-                      onChange={(e) =>
-                        setConfig({ ...config, valorSalario: parseFloat(e.target.value) || 0 })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
-                      placeholder="0.00"
-                    />
-                  </div>
-                </div>
+          <div className="flex items-center gap-4 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
+            {/* Informações do Salário */}
+            <div className="flex gap-6 text-sm">
+              <div>
+                <span className="text-gray-600 dark:text-gray-400">Tipo: </span>
+                <span className="font-medium text-gray-800 dark:text-gray-200">
+                  {config.tipoSalario === 'hora' ? 'Por Hora' : 'Mensal'}
+                </span>
               </div>
-
-              {/* Botão de Configurações Avançadas */}
-              <button
-                onClick={() => setIsConfigModalOpen(true)}
-                className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg flex items-center gap-2 whitespace-nowrap self-end"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Configurações
-              </button>
+              <div>
+                <span className="text-gray-600 dark:text-gray-400">Moeda: </span>
+                <span className="font-medium text-gray-800 dark:text-gray-200">
+                  {config.currency === 'BRL' ? 'R$' : config.currency === 'PYG' ? '₲' : '$'}
+                </span>
+              </div>
+              {valorHora > 0 && (
+                <div>
+                  <span className="text-gray-600 dark:text-gray-400">Valor/hora: </span>
+                  <span className="font-semibold text-primary-700 dark:text-primary-300">
+                    {formatCurrency(valorHora, config.currency)}
+                  </span>
+                </div>
+              )}
             </div>
+
+            {/* Input do Valor do Salário */}
+            <div className="flex items-center gap-2 ml-auto">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                Salário:
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={config.valorSalario}
+                onChange={(e) =>
+                  setConfig({ ...config, valorSalario: parseFloat(e.target.value) || 0 })
+                }
+                className="w-40 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm"
+                placeholder="0.00"
+              />
+            </div>
+
+            {/* Botão de Configurações */}
+            <button
+              onClick={() => setIsConfigModalOpen(true)}
+              className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg flex items-center gap-2 whitespace-nowrap"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Config
+            </button>
           </div>
         </div>
 

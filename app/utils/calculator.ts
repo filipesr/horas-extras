@@ -116,8 +116,11 @@ export const calcularHorasNoturnas = (
  * - Feriado: adicional de 100% sobre TODAS as horas (não separa hora extra)
  * - Noturno a partir das 20h: adicional noturno (20%) sobre horas noturnas
  * - Adicionais de domingo/feriado e noturno são cumulativos
+ *
+ * IMPORTANTE: Esta função assume que entrada e saída estão no mesmo dia.
+ * Para períodos que cruzam meia-noite, use calculateRecordWithDaySplit
  */
-export const calculateRecord = (
+const calculateSingleDayRecord = (
   entrada: Date,
   saida: Date,
   config: Config,
@@ -202,4 +205,56 @@ export const calculateRecord = (
     valorFeriado,
     valorTotal,
   }
+}
+
+/**
+ * Divide um período de trabalho que cruza meia-noite em múltiplos registros,
+ * um para cada dia, aplicando as regras específicas de cada dia.
+ *
+ * Exemplo: Sábado 22h até Domingo 02h
+ * - Divide em: Sábado 22h-00h e Domingo 00h-02h
+ * - Aplica regras de sábado (extra 50%) no primeiro período
+ * - Aplica regras de domingo (100%) no segundo período
+ */
+export const calculateRecord = (
+  entrada: Date,
+  saida: Date,
+  config: Config,
+  somenteExtras: boolean
+): WorkRecord | WorkRecord[] => {
+  // Verificar se cruza meia-noite
+  const entradaDate = new Date(entrada)
+  const saidaDate = new Date(saida)
+
+  const entradaDay = new Date(entradaDate.getFullYear(), entradaDate.getMonth(), entradaDate.getDate())
+  const saidaDay = new Date(saidaDate.getFullYear(), saidaDate.getMonth(), saidaDate.getDate())
+
+  // Se não cruza dia, calcula normalmente
+  if (entradaDay.getTime() === saidaDay.getTime()) {
+    return calculateSingleDayRecord(entrada, saida, config, somenteExtras)
+  }
+
+  // Se cruza um ou mais dias, divide em períodos
+  const records: WorkRecord[] = []
+  let currentStart = new Date(entrada)
+
+  while (currentStart < saida) {
+    // Calcular meia-noite do próximo dia
+    const currentDay = new Date(currentStart.getFullYear(), currentStart.getMonth(), currentStart.getDate())
+    const nextMidnight = new Date(currentDay.getTime() + 24 * 60 * 60 * 1000)
+
+    // Determinar fim do período atual
+    const currentEnd = nextMidnight < saida ? nextMidnight : saida
+
+    // Calcular registro para este período
+    const record = calculateSingleDayRecord(currentStart, currentEnd, config, somenteExtras)
+    records.push(record)
+
+    // Avançar para o próximo período
+    currentStart = nextMidnight
+  }
+
+  // Se houver múltiplos registros, retornar array
+  // Se houver apenas um (não deveria acontecer por causa da verificação acima), retornar único
+  return records.length === 1 ? records[0] : records
 }
