@@ -31,3 +31,52 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Estilos de impressão */
+@media print {
+  /* Remove margens e padding da página */
+  @page {
+    margin: 1cm;
+  }
+
+  /* Remove elementos que não devem ser impressos */
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Ajusta o fundo para impressão */
+  body {
+    background: white !important;
+  }
+
+  /* Remove sombras e arredondamentos para economizar tinta */
+  * {
+    box-shadow: none !important;
+  }
+
+  /* Garante que a tabela seja impressa corretamente */
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  /* Remove transições e animações para impressão mais rápida */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
