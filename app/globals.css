@@ -34,9 +34,9 @@ body {
 
 /* Estilos de impressão */
 @media print {
-  /* Remove margens e padding da página */
+  /* Deixa margem 0 para o usuário configurar na impressão */
   @page {
-    margin: 1cm;
+    margin: 0;
   }
 
   /* Remove elementos que não devem ser impressos */
@@ -78,5 +78,25 @@ body {
   *::after {
     animation-duration: 0s !important;
     transition-duration: 0s !important;
+  }
+
+  /* Otimiza tamanho da fonte e espaçamento para impressão */
+  table {
+    font-size: 8pt !important;
+  }
+
+  th,
+  td {
+    padding: 2px 4px !important;
+  }
+
+  /* Remove padding extra do container */
+  main {
+    padding: 0 !important;
+  }
+
+  .bg-white,
+  .dark\:bg-gray-800 {
+    padding: 8px !important;
   }
 }

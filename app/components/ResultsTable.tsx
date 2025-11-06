@@ -32,6 +32,27 @@ const getTipoDiaColor = (tipoDia: TipoDia): string => {
 export default function ResultsTable({ records, totais, currency }: ResultsTableProps) {
   if (records.length === 0) return null
 
+  // Função auxiliar para formatar período de trabalho
+  const formatPeriodo = (entrada: Date, saida: Date) => {
+    const entradaDate = new Date(entrada)
+    const saidaDate = new Date(saida)
+
+    const diaEntrada = entradaDate.getDate()
+    const diaSaida = saidaDate.getDate()
+    const mesEntrada = entradaDate.getMonth()
+    const mesSaida = saidaDate.getMonth()
+
+    const horaEntrada = entradaDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    const horaSaida = saidaDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+
+    // Verifica se cruzou dias
+    if (diaEntrada !== diaSaida || mesEntrada !== mesSaida) {
+      return `de ${diaEntrada}, ${horaEntrada} ao ${diaSaida}, ${horaSaida}`
+    } else {
+      return `dia ${diaEntrada}, de ${horaEntrada} às ${horaSaida}`
+    }
+  }
+
   return (
     <div className="mb-8">
       <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
@@ -39,44 +60,32 @@ export default function ResultsTable({ records, totais, currency }: ResultsTable
       </h2>
 
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
+        <table className="w-full border-collapse text-xs">
           <thead>
             <tr className="bg-primary-100 dark:bg-primary-900/30">
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Entrada
+              <th className="px-2 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
+                Período
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Saída
+              <th className="px-2 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
+                Tipo
               </th>
-              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Tipo Dia
+              <th className="px-2 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
+                Hs Totais → Vlr Normal
               </th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Horas Totais
+              <th className="px-2 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
+                Hs Extras → Vlr Extra
               </th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Horas Extras
+              <th className="px-2 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
+                Hs Noturnas → Vlr Noturno
               </th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Horas Noturnas
+              <th className="px-2 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
+                Vlr Domingo
               </th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Valor Normal
+              <th className="px-2 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
+                Vlr Feriado
               </th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Valor Extra
-              </th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Valor Noturno
-              </th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Valor Domingo
-              </th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Valor Feriado
-              </th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
-                Valor Total
+              <th className="px-2 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 border-b-2 border-primary-300 dark:border-primary-700">
+                Vlr Total
               </th>
             </tr>
           </thead>
@@ -90,40 +99,32 @@ export default function ResultsTable({ records, totais, currency }: ResultsTable
                     : 'bg-gray-50 dark:bg-gray-700/50'
                 } hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors`}
               >
-                <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
-                  {formatDateTime(record.entrada)}
+                <td className="px-2 py-2 text-xs text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                  {formatPeriodo(record.entrada, record.saida)}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
-                  {formatDateTime(record.saida)}
-                </td>
-                <td className={`px-4 py-3 text-sm text-center font-medium border-b border-gray-200 dark:border-gray-700 ${getTipoDiaColor(record.tipoDia)}`}>
+                <td className={`px-2 py-2 text-xs text-center font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap ${getTipoDiaColor(record.tipoDia)}`}>
                   {getTipoDiaLabel(record.tipoDia)}
                 </td>
-                <td className="px-4 py-3 text-sm text-right text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
-                  {formatHours(record.horasTrabalhadas)}
+                <td className="px-2 py-2 text-xs text-right text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                  {formatHours(record.horasTrabalhadas)} → {formatCurrency(record.valorNormal, currency)}
                 </td>
-                <td className="px-4 py-3 text-sm text-right text-orange-600 dark:text-orange-400 font-medium border-b border-gray-200 dark:border-gray-700">
-                  {formatHours(record.horasExtras)}
+                <td className="px-2 py-2 text-xs text-right text-orange-600 dark:text-orange-400 font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                  {record.horasExtras > 0
+                    ? `${formatHours(record.horasExtras)} → ${formatCurrency(record.valorExtra, currency)}`
+                    : '-'}
                 </td>
-                <td className="px-4 py-3 text-sm text-right text-purple-600 dark:text-purple-400 font-medium border-b border-gray-200 dark:border-gray-700">
-                  {formatHours(record.horasNoturnas)}
+                <td className="px-2 py-2 text-xs text-right text-purple-600 dark:text-purple-400 font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                  {record.horasNoturnas > 0
+                    ? `${formatHours(record.horasNoturnas)} → ${formatCurrency(record.valorNoturno, currency)}`
+                    : '-'}
                 </td>
-                <td className="px-4 py-3 text-sm text-right text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
-                  {formatCurrency(record.valorNormal, currency)}
-                </td>
-                <td className="px-4 py-3 text-sm text-right text-orange-600 dark:text-orange-400 font-medium border-b border-gray-200 dark:border-gray-700">
-                  {formatCurrency(record.valorExtra, currency)}
-                </td>
-                <td className="px-4 py-3 text-sm text-right text-purple-600 dark:text-purple-400 font-medium border-b border-gray-200 dark:border-gray-700">
-                  {formatCurrency(record.valorNoturno, currency)}
-                </td>
-                <td className="px-4 py-3 text-sm text-right text-red-600 dark:text-red-400 font-medium border-b border-gray-200 dark:border-gray-700">
+                <td className="px-2 py-2 text-xs text-right text-red-600 dark:text-red-400 font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                   {record.valorDomingo > 0 ? formatCurrency(record.valorDomingo, currency) : '-'}
                 </td>
-                <td className="px-4 py-3 text-sm text-right text-pink-600 dark:text-pink-400 font-medium border-b border-gray-200 dark:border-gray-700">
+                <td className="px-2 py-2 text-xs text-right text-pink-600 dark:text-pink-400 font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                   {record.valorFeriado > 0 ? formatCurrency(record.valorFeriado, currency) : '-'}
                 </td>
-                <td className="px-4 py-3 text-sm text-right font-semibold text-green-600 dark:text-green-400 border-b border-gray-200 dark:border-gray-700">
+                <td className="px-2 py-2 text-xs text-right font-semibold text-green-600 dark:text-green-400 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                   {formatCurrency(record.valorTotal, currency)}
                 </td>
               </tr>
@@ -132,36 +133,27 @@ export default function ResultsTable({ records, totais, currency }: ResultsTable
           <tfoot>
             <tr className="bg-primary-200 dark:bg-primary-900/40 font-bold">
               <td
-                colSpan={3}
-                className="px-4 py-4 text-sm text-gray-800 dark:text-gray-200 border-t-2 border-primary-400 dark:border-primary-600"
+                colSpan={2}
+                className="px-2 py-3 text-xs text-gray-800 dark:text-gray-200 border-t-2 border-primary-400 dark:border-primary-600"
               >
                 TOTAIS
               </td>
-              <td className="px-4 py-4 text-sm text-right text-gray-800 dark:text-gray-200 border-t-2 border-primary-400 dark:border-primary-600">
-                {formatHours(totais.horasTrabalhadas)}
+              <td className="px-2 py-3 text-xs text-right text-gray-800 dark:text-gray-200 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
+                {formatHours(totais.horasTrabalhadas)} → {formatCurrency(totais.valorNormal, currency)}
               </td>
-              <td className="px-4 py-4 text-sm text-right text-orange-700 dark:text-orange-300 border-t-2 border-primary-400 dark:border-primary-600">
-                {formatHours(totais.horasExtras)}
+              <td className="px-2 py-3 text-xs text-right text-orange-700 dark:text-orange-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
+                {formatHours(totais.horasExtras)} → {formatCurrency(totais.valorExtra, currency)}
               </td>
-              <td className="px-4 py-4 text-sm text-right text-purple-700 dark:text-purple-300 border-t-2 border-primary-400 dark:border-primary-600">
-                {formatHours(totais.horasNoturnas)}
+              <td className="px-2 py-3 text-xs text-right text-purple-700 dark:text-purple-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
+                {formatHours(totais.horasNoturnas)} → {formatCurrency(totais.valorNoturno, currency)}
               </td>
-              <td className="px-4 py-4 text-sm text-right text-gray-800 dark:text-gray-200 border-t-2 border-primary-400 dark:border-primary-600">
-                {formatCurrency(totais.valorNormal, currency)}
-              </td>
-              <td className="px-4 py-4 text-sm text-right text-orange-700 dark:text-orange-300 border-t-2 border-primary-400 dark:border-primary-600">
-                {formatCurrency(totais.valorExtra, currency)}
-              </td>
-              <td className="px-4 py-4 text-sm text-right text-purple-700 dark:text-purple-300 border-t-2 border-primary-400 dark:border-primary-600">
-                {formatCurrency(totais.valorNoturno, currency)}
-              </td>
-              <td className="px-4 py-4 text-sm text-right text-red-700 dark:text-red-300 border-t-2 border-primary-400 dark:border-primary-600">
+              <td className="px-2 py-3 text-xs text-right text-red-700 dark:text-red-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
                 {totais.valorDomingo > 0 ? formatCurrency(totais.valorDomingo, currency) : '-'}
               </td>
-              <td className="px-4 py-4 text-sm text-right text-pink-700 dark:text-pink-300 border-t-2 border-primary-400 dark:border-primary-600">
+              <td className="px-2 py-3 text-xs text-right text-pink-700 dark:text-pink-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
                 {totais.valorFeriado > 0 ? formatCurrency(totais.valorFeriado, currency) : '-'}
               </td>
-              <td className="px-4 py-4 text-sm text-right text-green-700 dark:text-green-300 border-t-2 border-primary-400 dark:border-primary-600">
+              <td className="px-2 py-3 text-xs text-right text-green-700 dark:text-green-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
                 {formatCurrency(totais.valorTotal, currency)}
               </td>
             </tr>
