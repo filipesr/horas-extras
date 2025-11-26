@@ -1,5 +1,6 @@
 import { Config } from '../types'
 import { formatCurrency } from '../utils/formatters'
+import { useState } from 'react'
 
 interface ConfigurationSectionProps {
   config: Config
@@ -12,6 +13,8 @@ export default function ConfigurationSection({
   setConfig,
   valorHora,
 }: ConfigurationSectionProps) {
+    const [showHint, setShowHint] = useState(false)
+  
   // Funções auxiliares para converter arrays
   const feriadosString = config.feriados.join(', ')
   const sabadosLivresString = config.sabadosLivres.join(', ')
@@ -78,9 +81,88 @@ export default function ConfigurationSection({
           {/* Horas Mensais */}
           {config.tipoSalario === 'mensal' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Horas Mensais
-              </label>
+              <div className="flex justify-between text-sm font-medium">
+                <label className=" text-gray-700 dark:text-gray-300">
+                  Horas Mensais
+                </label>
+                {/* Botão de Ajuda */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onMouseEnter={() => setShowHint(true)}
+                    onMouseLeave={() => setShowHint(false)}
+                    onClick={() => setShowHint(!showHint)}
+                    className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-full transition-colors"
+                    aria-label="Ajuda sobre formatos aceitos"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </button>
+
+                  {/* Popover com formatos aceitos */}
+                  {showHint && (
+                    <div className="absolute right-0 top-full mt-2 w-[40rem] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-50">
+                      <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                        Cálculo base de horas extras:
+                      </h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                        O cálculo das horas mensais toma como base um mês de 30 dias, ou seja:
+                        <ul className="pl-2 my-2 text-xs text-gray-500 dark:text-gray-500 list-disc list-inside">
+                          <li>4.25 semanas</li>
+                        </ul>
+                      </p>
+                      <h3 className="text-sm font-semibold text-primary-700 dark:text-primary-400 mb-2">
+                        Funcionários: 188 horas mensais
+                      </h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                        Considera um sábado livre e um sábado de plantão. Então:
+                        <ul className="pl-2 my-2 text-xs text-gray-500 dark:text-gray-500 list-inside">
+                          <li className='list-disc '>8 horas diárias de segunda a sexta = 40 horas semanais</li>
+                          <li className='pl-4'> + 5 horas no sábado normal = 45 horas semanais ou</li>
+                          <li className='pl-4'> + 7 horas no sábado de plantão = 47 horas semanais ou</li>
+                          <li className='pl-4'> + 0 horas no sábado livre = 40 horas semanais</li>
+                        </ul>
+
+                        Portanto, para calcular as horas mensais:
+                        <ul className="pl-2 mb-2 text-xs text-gray-500 dark:text-gray-500 list-disc list-inside">
+                          <li>Com sábado normal: 45 horas semanais x 2.25 semanas = 101 horas</li>
+                          <li>Com sábado de plantão: 47 horas semanais x 1 semana = 47 horas</li>
+                          <li>Com sábado livre: 40 horas semanais = 40 horas</li>
+                        </ul>
+
+                        Totalizando:
+                        <ul className="pl-2 text-xs text-gray-500 dark:text-gray-500 list-disc list-inside">
+                          <li>101 + 47  + 40 = 188 horas mensais para o funcionário</li>
+                        </ul>
+
+                      </p>
+                      <h3 className="text-sm font-semibold text-primary-700 dark:text-primary-400 mb-2">
+                        Estagiário: 85 horas mensais
+                      </h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                        Considera que o estagiário trabalha de segunda a sexta-feira, sem sábado. Então:
+                        <ul className="pl-2 my-2 text-xs text-gray-500 dark:text-gray-500 list-inside">
+                          <li className='list-disc '>4 horas diárias de segunda a sexta = 20 horas semanais</li>
+                        </ul>
+
+                        Portanto, para calcular as horas mensais:
+                        <ul className="pl-2 mb-2 text-xs text-gray-500 dark:text-gray-500 list-disc list-inside">
+                          <li>Com sábado normal: 20 horas semanais x 4.25 semanas = 85 horas mensais</li>
+                        </ul>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
               <input
                 type="number"
                 value={config.horasMensais}
