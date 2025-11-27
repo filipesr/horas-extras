@@ -13,7 +13,8 @@ export default function ConfigurationSection({
   setConfig,
   valorHora,
 }: ConfigurationSectionProps) {
-    const [showHint, setShowHint] = useState(false)
+    const [showHintCountry, setShowHintCountry] = useState(false)
+    const [showHintMonthlyHour, setShowHintMonthlyHour] = useState(false)
   
   // Funções auxiliares para converter arrays
   const feriadosString = config.feriados.join(', ')
@@ -35,6 +36,39 @@ export default function ConfigurationSection({
     setConfig({ ...config, sabadosLivres })
   }
 
+  const handleRegimeChange = (newRegime: 'Brasil' | 'Paraguay') => {
+    // Valores padrão para cada regime
+    if (newRegime === 'Paraguay') {
+      setConfig({
+        ...config,
+        regime: newRegime,
+        horasMensais: 208,
+        percentualExtra: 50,
+        percentualNoturno: 30,
+        percentualDomingo: 100,
+        percentualFeriado: 100,
+        horasDiarias: 8,
+        horasSabado: 5,
+        inicioNoturno: 20,
+        fimNoturno: 6,
+      })
+    } else {
+      setConfig({
+        ...config,
+        regime: newRegime,
+        horasMensais: 220,
+        percentualExtra: 50,
+        percentualNoturno: 30,
+        percentualDomingo: 100,
+        percentualFeriado: 100,
+        horasDiarias: 8,
+        horasSabado: 4,
+        inicioNoturno: 22,
+        fimNoturno: 5,
+      })
+    }
+  }
+
   return (
     <div>
       {/* Seção: Salário */}
@@ -42,7 +76,7 @@ export default function ConfigurationSection({
         <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-300">
           Configurações de Salário
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Tipo de Salário */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -57,6 +91,103 @@ export default function ConfigurationSection({
             >
               <option value="hora">Por Hora</option>
               <option value="mensal">Mensal</option>
+            </select>
+          </div>
+
+          {/* Regime */}
+          <div>
+            <div className="flex justify-between text-sm font-medium">
+              <label className=" text-gray-700 dark:text-gray-300">
+                Regime
+              </label>
+              {/* Botão de Ajuda */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onMouseEnter={() => setShowHintCountry(true)}
+                  onMouseLeave={() => setShowHintCountry(false)}
+                  onClick={() => setShowHintCountry(!showHintCountry)}
+                  className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-full transition-colors"
+                  aria-label="Ajuda sobre formatos aceitos"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+
+                {/* Popover com informações sobre regimes */}
+                {showHintCountry && (
+                  <div className="absolute -right-80 top-full mt-2 w-[45rem] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-50">
+                    <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                      Regimes de Cálculo de Horas Extras
+                    </h3>
+
+                    <h3 className="text-sm font-semibold text-primary-700 dark:text-primary-400 mb-2">
+                      Brasil (CLT)
+                    </h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                      <strong>Dias úteis (Segunda a Sábado):</strong>
+                      <ul className="pl-4 my-1 text-xs text-gray-500 dark:text-gray-500 list-disc list-inside">
+                        <li>Jornada normal: 8h (seg-sex) e 4h (sábado)</li>
+                        <li>Hora extra: +50% sobre o valor da hora normal</li>
+                        <li>Adicional noturno (22h-5h): +30% sobre horas noturnas</li>
+                        <li>Hora extra noturna: adicional de 50% + adicional de 30% (acumulam)</li>
+                      </ul>
+
+                      <strong className="block mt-2">Domingos e Feriados:</strong>
+                      <ul className="pl-4 my-1 text-xs text-gray-500 dark:text-gray-500 list-disc list-inside">
+                        <li>Adicional de +100% sobre TODAS as horas trabalhadas</li>
+                        <li>Adicional noturno (+30%) ACUMULA com o adicional de domingo/feriado</li>
+                        <li>Exemplo: hora noturna em domingo = hora base + 100% (domingo) + 30% (noturno)</li>
+                      </ul>
+                    </p>
+
+                    <h3 className="text-sm font-semibold text-primary-700 dark:text-primary-400 mb-2 mt-3">
+                      Paraguay (Lei Nº 213/93)
+                    </h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                      <strong>Dias úteis (Segunda a Sábado):</strong>
+                      <ul className="pl-4 my-1 text-xs text-gray-500 dark:text-gray-500 list-disc list-inside">
+                        <li>Jornada normal: 8h (seg-sex) e 5h (sábado)</li>
+                        <li>Hora extra diurna: +50% (= 1,5x o valor da hora base)</li>
+                        <li>Hora ordinária noturna (20h-6h): +30% (= 1,3x o valor da hora base)</li>
+                        <li>Hora extra noturna: hora base + 30% (noturno) + 100% sobre a hora noturna (= 2,6x hora base)</li>
+                      </ul>
+
+                      <strong className="block mt-2">Domingos e Feriados:</strong>
+                      <ul className="pl-4 my-1 text-xs text-gray-500 dark:text-gray-500 list-disc list-inside">
+                        <li>Adicional de +100% sobre TODAS as horas trabalhadas</li>
+                        <li>Adicional noturno NÃO acumula em domingos/feriados</li>
+                        <li>Todas as horas são pagas como: hora base + 100% (domingo/feriado)</li>
+                        <li>Exemplo: hora noturna em domingo = apenas hora base + 100% (sem adicional noturno)</li>
+                      </ul>
+                    </p>
+
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                        <strong>Diferença principal:</strong> No Brasil, adicionais de domingo/feriado e noturno acumulam.
+                        No Paraguay, em domingos e feriados aplica-se apenas o adicional de 100%, sem acumular com o noturno.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <select
+              value={config.regime}
+              onChange={(e) => handleRegimeChange(e.target.value as 'Brasil' | 'Paraguay')}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            >
+              <option value="Brasil">Brasil</option>
+              <option value="Paraguay">Paraguay</option>
             </select>
           </div>
 
@@ -89,9 +220,9 @@ export default function ConfigurationSection({
                 <div className="relative">
                   <button
                     type="button"
-                    onMouseEnter={() => setShowHint(true)}
-                    onMouseLeave={() => setShowHint(false)}
-                    onClick={() => setShowHint(!showHint)}
+                    onMouseEnter={() => setShowHintMonthlyHour(true)}
+                    onMouseLeave={() => setShowHintMonthlyHour(false)}
+                    onClick={() => setShowHintMonthlyHour(!showHintMonthlyHour)}
                     className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-full transition-colors"
                     aria-label="Ajuda sobre formatos aceitos"
                   >
@@ -109,7 +240,7 @@ export default function ConfigurationSection({
                   </button>
 
                   {/* Popover com formatos aceitos */}
-                  {showHint && (
+                  {showHintMonthlyHour && (
                     <div className="absolute right-0 top-full mt-2 w-[40rem] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-4 z-50">
                       <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
                         Cálculo base de horas extras:

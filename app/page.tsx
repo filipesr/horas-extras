@@ -13,18 +13,19 @@ import SummaryCards from './components/SummaryCards'
 
 export default function Home() {
   const [config, setConfig] = useState<Config>({
+    regime: 'Brasil',
     tipoSalario: 'mensal',
     valorSalario: 1000,
-    horasMensais: 188,
+    horasMensais: 220,
     currency: 'USD',
     percentualExtra: 50,
     percentualNoturno: 30,
     percentualDomingo: 100,
     percentualFeriado: 100,
     horasDiarias: 8,
-    horasSabado: 5,
-    inicioNoturno: 20,
-    fimNoturno: 5,
+    horasSabado: 4,
+    inicioNoturno: 22,
+    fimNoturno: 6,
     feriados: [],
     sabadosLivres: [],
   })

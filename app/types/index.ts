@@ -17,6 +17,7 @@ export interface WorkRecord {
 }
 
 export interface Config {
+  regime: 'Brasil' | 'Paraguay'
   tipoSalario: 'hora' | 'mensal'
   valorSalario: number
   horasMensais: number
