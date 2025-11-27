@@ -106,23 +106,12 @@ export const calcularHorasNoturnas = (
 }
 
 /**
- * Calcula um registro de trabalho completo
+ * Calcula um registro de trabalho completo usando configurações detalhadas
  *
- * Regras Brasil:
- * - Segunda a sexta: jornada de 8h, horas além recebem adicional de hora extra (50%)
- * - Sábado: jornada de 4h, horas além recebem adicional de hora extra (50%)
- * - Sábado livre: adicional de 50% sobre TODAS as horas (não é hora extra)
- * - Domingo: adicional de 100% sobre TODAS as horas (não separa hora extra)
- * - Feriado: adicional de 100% sobre TODAS as horas (não separa hora extra)
- * - Noturno a partir das 22h: adicional noturno (30%) sobre horas noturnas
- * - Adicionais de domingo/feriado e noturno são cumulativos
- *
- * Regras Paraguay:
- * - Segunda a sábado: jornada de 8h (seg-sex) ou 4h (sáb)
- * - Hora extra diurna (seg-sáb): +50% (1,5x)
- * - Hora ordinária noturna (seg-sáb): +30% (1,3x)
- * - Hora extra noturna (seg-sáb): +100% sobre hora noturna (2,6x hora diurna)
- * - Qualquer hora em domingo/feriado: +100% (2x), NÃO acumula com extra ou noturno
+ * A lógica agora é genérica e usa as configurações avançadas para determinar:
+ * - Percentuais específicos para hora extra diurna, noturna e domingo/feriado
+ * - Em quais dias o adicional noturno é aplicado
+ * - Se os adicionais são somados ou multiplicados em cascata
  *
  * IMPORTANTE: Esta função assume que entrada e saída estão no mesmo dia.
  * Para períodos que cruzam meia-noite, use calculateRecord
@@ -160,85 +149,123 @@ const calculateSingleDayRecord = (
     config.fimNoturno
   )
 
-  // Precisamos separar as horas noturnas entre normais e extras
-  const horasNoturnasNormais = horasNormais > 0
+  // Separar horas noturnas entre normais e extras (proporcionalmente)
+  const horasNoturnasNormais = horasNormais > 0 && horasNoturnas > 0
     ? Math.min(horasNoturnas, horasNormais * (horasNoturnas / horasTrabalhadas))
     : 0
   const horasNoturnasExtras = horasNoturnas - horasNoturnasNormais
 
-  // Calcular valores base
+  // Calcular horas diurnas (não noturnas)
+  const horasDiurnasNormais = horasNormais - horasNoturnasNormais
+  const horasDiurnasExtras = horasExtras - horasNoturnasExtras
+
+  // Verificar se deve aplicar adicional noturno neste tipo de dia
+  const aplicarNoturno =
+    (tipoDia === 'seg-sex' && config.noturnoSegSex) ||
+    (tipoDia === 'sabado' && config.noturnoSabado) ||
+    (tipoDia === 'sabado-livre' && config.noturnoSabado) ||
+    ((tipoDia === 'domingo' || tipoDia === 'feriado') && config.noturnoDomingoFeriado)
+
+  // Calcular valores
   let valorNormal = 0
   let valorExtra = 0
   let valorNoturno = 0
   let valorDomingo = 0
   let valorFeriado = 0
 
-  // REGIME PARAGUAIO
-  if (config.regime === 'Paraguay') {
-    if (tipoDia === 'domingo' || tipoDia === 'feriado') {
-      // Paraguay: Em domingo/feriado, adicional de 100% sobre hora normal
-      // NÃO acumula com noturno
-      valorNormal = horasTrabalhadas * valorHora
-      valorExtra = horasTrabalhadas * valorHora * (config.percentualDomingo / 100)
+  // DOMINGOS E FERIADOS
+  if (tipoDia === 'domingo' || tipoDia === 'feriado') {
+    // Valor base de todas as horas
+    valorNormal = horasTrabalhadas * valorHora
 
-      if (tipoDia === 'domingo') {
-        valorDomingo = valorExtra
+    // Adicional de domingo/feriado sobre todas as horas
+    valorExtra = horasTrabalhadas * valorHora * (config.percentualExtraDomingoFeriado / 100)
+
+    // Adicional noturno (se aplicável)
+    if (aplicarNoturno && horasNoturnas > 0) {
+      if (config.adicionaisSomados) {
+        // Somado: adicional noturno sobre as horas noturnas
+        valorNoturno = horasNoturnas * valorHora * (config.percentualNoturno / 100)
       } else {
-        valorFeriado = valorExtra
+        // Multiplicado em cascata: adicional noturno aplicado sobre o valor já com adicional de domingo/feriado
+        const valorHoraComDomingoFeriado = valorHora * (1 + config.percentualExtraDomingoFeriado / 100)
+        valorNoturno = horasNoturnas * valorHoraComDomingoFeriado * (config.percentualNoturno / 100)
       }
-    } else if (tipoDia === 'sabado-livre') {
-      // Sábado livre: adicional de 50% sobre TODAS as horas
-      valorNormal = horasTrabalhadas * valorHora
-      valorExtra = horasTrabalhadas * valorHora * 0.5
+    }
+
+    // Separar para relatório
+    if (tipoDia === 'domingo') {
+      valorDomingo = valorExtra
     } else {
-      // Segunda a sábado: aplica regras de extra e noturno
-
-      // Horas diurnas normais
-      const horasDiurnasNormais = horasNormais - horasNoturnasNormais
-      valorNormal = horasDiurnasNormais * valorHora
-
-      // Horas noturnas normais: valor normal + 30%
-      const valorHorasNoturnasNormais = horasNoturnasNormais * valorHora
-      valorNormal += valorHorasNoturnasNormais
-      valorNoturno = valorHorasNoturnasNormais * (config.percentualNoturno / 100)
-
-      // Horas extras diurnas: 1.5x
-      const horasDiurnasExtras = horasExtras - horasNoturnasExtras
-      valorExtra = horasDiurnasExtras * valorHora * (1 + config.percentualExtra / 100)
-
-      // Horas extras noturnas: 2.6x hora diurna
-      // (1.3x base noturna + 100% de extra sobre base noturna = 2.6x base diurna)
-      const valorHorasNoturnasExtras = horasNoturnasExtras * valorHora
-      valorExtra += valorHorasNoturnasExtras * (1 + config.percentualExtra / 100)
-      valorNoturno += valorHorasNoturnasExtras * (config.percentualNoturno / 100)
+      valorFeriado = valorExtra
     }
   }
-  // REGIME BRASILEIRO
+  // SÁBADO LIVRE
+  else if (tipoDia === 'sabado-livre') {
+    // Valor base de todas as horas
+    valorNormal = horasTrabalhadas * valorHora
+
+    // Adicional de 50% sobre todas as horas (sábado livre)
+    valorExtra = horasTrabalhadas * valorHora * 0.5
+
+    // Adicional noturno (se aplicável)
+    if (aplicarNoturno && horasNoturnas > 0) {
+      if (config.adicionaisSomados) {
+        valorNoturno = horasNoturnas * valorHora * (config.percentualNoturno / 100)
+      } else {
+        const valorHoraComExtra = valorHora * 1.5
+        valorNoturno = horasNoturnas * valorHoraComExtra * (config.percentualNoturno / 100)
+      }
+    }
+  }
+  // DIAS ÚTEIS (SEG-SEX E SÁBADO NORMAL)
   else {
-    if (tipoDia === 'domingo') {
-      // Brasil: Domingo - valor normal + adicional de 100% vai para "Extra"
-      // ACUMULA com noturno
-      valorNormal = horasTrabalhadas * valorHora
-      valorExtra = horasTrabalhadas * valorHora * (config.percentualDomingo / 100)
-      valorDomingo = valorExtra
-      valorNoturno = horasNoturnas * valorHora * (config.percentualNoturno / 100)
-    } else if (tipoDia === 'feriado') {
-      // Brasil: Feriado - valor normal + adicional de 100% vai para "Extra"
-      // ACUMULA com noturno
-      valorNormal = horasTrabalhadas * valorHora
-      valorExtra = horasTrabalhadas * valorHora * (config.percentualFeriado / 100)
-      valorFeriado = valorExtra
-      valorNoturno = horasNoturnas * valorHora * (config.percentualNoturno / 100)
-    } else if (tipoDia === 'sabado-livre') {
-      // Brasil: Sábado livre - adicional de 50% sobre TODAS as horas
-      valorNormal = horasTrabalhadas * valorHora
-      valorExtra = horasTrabalhadas * valorHora * 0.5
-      valorNoturno = horasNoturnas * valorHora * (config.percentualNoturno / 100)
-    } else {
-      // Brasil: Seg-Sex e Sábado normal - cálculo tradicional
-      valorNormal = horasNormais * valorHora
-      valorExtra = horasExtras * valorHora * (1 + config.percentualExtra / 100)
-      valorNoturno = horasNoturnas * valorHora * (config.percentualNoturno / 100)
+    // === HORAS NORMAIS ===
+
+    // Horas diurnas normais: valor base
+    valorNormal = horasDiurnasNormais * valorHora
+
+    // Horas noturnas normais: valor base + adicional noturno
+    if (horasNoturnasNormais > 0) {
+      const valorBaseNoturnasNormais = horasNoturnasNormais * valorHora
+      valorNormal += valorBaseNoturnasNormais
+
+      if (aplicarNoturno) {
+        valorNoturno = valorBaseNoturnasNormais * (config.percentualNoturno / 100)
+      }
+    }
+
+    // === HORAS EXTRAS ===
+
+    // Horas extras diurnas
+    if (horasDiurnasExtras > 0) {
+      valorExtra += horasDiurnasExtras * valorHora * (1 + config.percentualExtraDiurna / 100)
+    }
+
+    // Horas extras noturnas
+    if (horasNoturnasExtras > 0) {
+      const valorBaseNoturnasExtras = horasNoturnasExtras * valorHora
+
+      if (aplicarNoturno) {
+        if (config.adicionaisSomados) {
+          // SOMADOS: percentualExtraNoturna JÁ é o total (não adiciona percentualNoturno)
+          // Ex: hora base (10) × (1 + 100% extra) = 20 total
+          // O percentualExtraNoturna já considera tudo, não soma o percentualNoturno
+          valorExtra += valorBaseNoturnasExtras * (1 + config.percentualExtraNoturna / 100)
+          // valorNoturno não é adicionado porque já está incluso no percentualExtraNoturna
+        } else {
+          // CASCATA: adicional noturno incide sobre o valor da hora extra
+          // Ex: hora extra = 10 × (1 + 100%) = 20
+          //     adicional noturno = 20 × 30% = 6
+          //     total = 20 + 6 = 26
+          const valorHoraExtra = valorBaseNoturnasExtras * (1 + config.percentualExtraNoturna / 100)
+          valorExtra += valorHoraExtra
+          valorNoturno += valorHoraExtra * (config.percentualNoturno / 100)
+        }
+      } else {
+        // Sem adicional noturno, apenas hora extra
+        valorExtra += valorBaseNoturnasExtras * (1 + config.percentualExtraNoturna / 100)
+      }
     }
   }
 

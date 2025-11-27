@@ -18,10 +18,26 @@ export default function Home() {
     valorSalario: 1000,
     horasMensais: 220,
     currency: 'USD',
-    percentualExtra: 50,
+
+    // Percentuais de hora extra
+    percentualExtraDiurna: 50,
+    percentualExtraNoturna: 50,
+    percentualExtraDomingoFeriado: 100,
+
+    // Adicional noturno
     percentualNoturno: 30,
+    noturnoSegSex: true,
+    noturnoSabado: true,
+    noturnoDomingoFeriado: true,
+
+    // Tipo de acumulação
+    adicionaisSomados: true, // Brasil soma os adicionais
+
+    // Compatibilidade
+    percentualExtra: 50,
     percentualDomingo: 100,
     percentualFeriado: 100,
+
     horasDiarias: 8,
     horasSabado: 4,
     inicioNoturno: 22,

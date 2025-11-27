@@ -43,10 +43,24 @@ export default function ConfigurationSection({
         ...config,
         regime: newRegime,
         horasMensais: 208,
-        percentualExtra: 50,
+
+        // Percentuais de hora extra
+        percentualExtraDiurna: 50,
+        percentualExtraNoturna: 100, // 100% sobre a hora noturna base
+        percentualExtraDomingoFeriado: 100,
+
+        // Adicional noturno
         percentualNoturno: 30,
-        percentualDomingo: 100,
-        percentualFeriado: 100,
+        noturnoSegSex: true,
+        noturnoSabado: true,
+        noturnoDomingoFeriado: true, // Paraguay NÃO acumula
+
+        // Tipo de acumulação
+        adicionaisSomados: false,
+
+        // Compatibilidade
+        percentualExtra: 50,
+
         horasDiarias: 8,
         horasSabado: 5,
         inicioNoturno: 20,
@@ -57,10 +71,24 @@ export default function ConfigurationSection({
         ...config,
         regime: newRegime,
         horasMensais: 220,
-        percentualExtra: 50,
+
+        // Percentuais de hora extra
+        percentualExtraDiurna: 50,
+        percentualExtraNoturna: 50,
+        percentualExtraDomingoFeriado: 100,
+
+        // Adicional noturno
         percentualNoturno: 30,
-        percentualDomingo: 100,
-        percentualFeriado: 100,
+        noturnoSegSex: true,
+        noturnoSabado: true,
+        noturnoDomingoFeriado: true, // Brasil acumula noturno em domingo/feriado
+
+        // Tipo de acumulação
+        adicionaisSomados: true,
+
+        // Compatibilidade
+        percentualExtra: 50,
+
         horasDiarias: 8,
         horasSabado: 4,
         inicioNoturno: 22,
@@ -386,74 +414,182 @@ export default function ConfigurationSection({
         </div>
       </div>
 
-      {/* Seção: Adicionais */}
-      <div className="mb-6">
+      {/* Seção: Configurações Avançadas de Horas Extras */}
+      <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg border border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-medium mb-3 text-gray-700 dark:text-gray-300">
-          Adicionais (%)
+          Configurações Avançadas de Horas Extras
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Percentual Hora Extra */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Hora Extra
-            </label>
-            <input
-              type="number"
-              value={config.percentualExtra}
-              onChange={(e) =>
-                setConfig({ ...config, percentualExtra: parseFloat(e.target.value) || 0 })
-              }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              placeholder="50"
-            />
-          </div>
 
-          {/* Percentual Noturno */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Noturno
-            </label>
-            <input
-              type="number"
-              value={config.percentualNoturno}
-              onChange={(e) =>
-                setConfig({ ...config, percentualNoturno: parseFloat(e.target.value) || 0 })
-              }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              placeholder="20"
-            />
-          </div>
+        {/* Percentuais de Hora Extra */}
+        <div className="mb-4">
+          <h4 className="text-sm font-semibold mb-2 text-gray-600 dark:text-gray-400">
+            Percentuais de Hora Extra (%)
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Hora Extra Diurna */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <span className="flex items-center gap-1">
+                  Hora Extra Diurna
+                  <span className="text-xs text-gray-500" title="Adicional aplicado sobre horas extras trabalhadas em horário diurno">ℹ️</span>
+                </span>
+              </label>
+              <input
+                type="number"
+                value={config.percentualExtraDiurna}
+                onChange={(e) =>
+                  setConfig({ ...config, percentualExtraDiurna: parseFloat(e.target.value) || 0 })
+                }
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                placeholder="50"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Ex: 50% = 1,5x hora base
+              </p>
+            </div>
 
-          {/* Percentual Domingo */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Domingo
-            </label>
-            <input
-              type="number"
-              value={config.percentualDomingo}
-              onChange={(e) =>
-                setConfig({ ...config, percentualDomingo: parseFloat(e.target.value) || 0 })
-              }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              placeholder="100"
-            />
-          </div>
+            {/* Hora Extra Noturna */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <span className="flex items-center gap-1">
+                  Hora Extra Noturna
+                  <span className="text-xs text-gray-500" title="Adicional aplicado sobre horas extras trabalhadas em horário noturno">ℹ️</span>
+                </span>
+              </label>
+              <input
+                type="number"
+                value={config.percentualExtraNoturna}
+                onChange={(e) =>
+                  setConfig({ ...config, percentualExtraNoturna: parseFloat(e.target.value) || 0 })
+                }
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                placeholder="50"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Ex: 50% ou 100% sobre hora noturna
+              </p>
+            </div>
 
-          {/* Percentual Feriado */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Feriado
-            </label>
+            {/* Hora Extra Domingo/Feriado */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <span className="flex items-center gap-1">
+                  Domingo/Feriado
+                  <span className="text-xs text-gray-500" title="Adicional aplicado sobre horas trabalhadas em domingos e feriados">ℹ️</span>
+                </span>
+              </label>
+              <input
+                type="number"
+                value={config.percentualExtraDomingoFeriado}
+                onChange={(e) =>
+                  setConfig({ ...config, percentualExtraDomingoFeriado: parseFloat(e.target.value) || 0 })
+                }
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                placeholder="100"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Ex: 100% = 2x hora base
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Aplicar Adicional Noturno */}
+        <div className="mb-4">
+          <h4 className="text-sm font-semibold mb-2 text-gray-600 dark:text-gray-400 flex items-center gap-1">
+            Aplicar Adicional Noturno
+            <span className="text-xs text-gray-500 font-normal" title="Define em quais dias o adicional noturno será aplicado">ℹ️</span>
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Percentual Noturno */}
+            <div>
+              <input
+                type="number"
+                value={config.percentualNoturno}
+                onChange={(e) =>
+                  setConfig({ ...config, percentualNoturno: parseFloat(e.target.value) || 0 })
+                }
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                placeholder="20"
+              />
+            </div>
+            {/* Noturno Seg-Sex */}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="noturnoSegSex"
+                checked={config.noturnoSegSex}
+                onChange={(e) =>
+                  setConfig({ ...config, noturnoSegSex: e.target.checked })
+                }
+                className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              />
+              <label htmlFor="noturnoSegSex" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                Segunda a Sexta
+              </label>
+            </div>
+
+            {/* Noturno Sábado */}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="noturnoSabado"
+                checked={config.noturnoSabado}
+                onChange={(e) =>
+                  setConfig({ ...config, noturnoSabado: e.target.checked })
+                }
+                className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              />
+              <label htmlFor="noturnoSabado" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                Sábado
+              </label>
+            </div>
+
+            {/* Noturno Domingo/Feriado */}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="noturnoDomingoFeriado"
+                checked={config.noturnoDomingoFeriado}
+                onChange={(e) =>
+                  setConfig({ ...config, noturnoDomingoFeriado: e.target.checked })
+                }
+                className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              />
+              <label htmlFor="noturnoDomingoFeriado" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                Domingo/Feriado
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Tipo de Acumulação */}
+        <div>
+          <h4 className="text-sm font-semibold mb-2 text-gray-600 dark:text-gray-400 flex items-center gap-1">
+            Tipo de Acumulação de Adicionais
+            <span className="text-xs text-gray-500 font-normal" title="Define como os adicionais (extra + noturno) são calculados">ℹ️</span>
+          </h4>
+          <div className="flex items-start gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
             <input
-              type="number"
-              value={config.percentualFeriado}
+              type="checkbox"
+              id="adicionaisSomados"
+              checked={config.adicionaisSomados}
               onChange={(e) =>
-                setConfig({ ...config, percentualFeriado: parseFloat(e.target.value) || 0 })
+                setConfig({ ...config, adicionaisSomados: e.target.checked })
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              placeholder="100"
+              className="mt-1 w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
             />
+            <div>
+              <label htmlFor="adicionaisSomados" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                Adicionais Somados
+              </label>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                ✓ Marcado: Adicional extra + adicional noturno são somados<br/>
+                <span className="italic">Ex: 50% (extra) + 30% (noturno) = 80% total</span><br/><br/>
+                ✗ Desmarcado: Adicional extra é aplicado em cascata sobre o adicional noturno<br/>
+                <span className="italic">Ex: hora base × 1,3 (noturno) × 1,5 (extra) = 1,95x</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>

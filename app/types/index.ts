@@ -22,10 +22,26 @@ export interface Config {
   valorSalario: number
   horasMensais: number
   currency: 'BRL' | 'PYG' | 'USD'
-  percentualExtra: number
+
+  // Percentuais de hora extra
+  percentualExtraDiurna: number // Percentual para hora extra diurna
+  percentualExtraNoturna: number // Percentual para hora extra noturna
+  percentualExtraDomingoFeriado: number // Percentual para hora extra em domingo/feriado
+
+  // Adicional noturno
   percentualNoturno: number
-  percentualDomingo: number
-  percentualFeriado: number
+  noturnoSegSex: boolean // Aplicar adicional noturno de seg-sex
+  noturnoSabado: boolean // Aplicar adicional noturno no sábado
+  noturnoDomingoFeriado: boolean // Aplicar adicional noturno em domingo/feriado
+
+  // Tipo de acumulação
+  adicionaisSomados: boolean // true = somados, false = multiplicados em cascata
+
+  // Configurações antigas mantidas para compatibilidade
+  percentualExtra: number // Compatibilidade
+  percentualDomingo: number // Compatibilidade
+  percentualFeriado: number // Compatibilidade
+
   horasDiarias: number
   horasSabado: number
   inicioNoturno: number
