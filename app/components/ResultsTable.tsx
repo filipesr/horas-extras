@@ -55,8 +55,9 @@ export default function ResultsTable({ records, totais, currency }: ResultsTable
 
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
-        Resultados
+      <h2 className="flex gap-2 text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+        Resultados de
+        <input type="text" className="flex-1 peer bg-transparent border-t-transparent border-b-2 border-x-transparent border-b-gray-200 focus:border-t-transparent focus:border-x-transparent focus:border-b-blue-500 focus:ring-0 disabled:opacity-50 disabled:pointer-events-none dark:border-b-neutral-700 dark:placeholder-neutral-500 dark:focus:ring-neutral-600 dark:focus:border-b-neutral-600" placeholder="nome do funcionário"></input>
       </h2>
 
       <div className="overflow-x-auto">

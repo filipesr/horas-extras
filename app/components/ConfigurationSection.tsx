@@ -42,7 +42,7 @@ export default function ConfigurationSection({
       setConfig({
         ...config,
         regime: newRegime,
-        horasMensais: 208,
+        horasMensais: 192,
 
         // Percentuais de hora extra
         percentualExtraDiurna: 50,
