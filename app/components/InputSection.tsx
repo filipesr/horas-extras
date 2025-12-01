@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 interface InputSectionProps {
   inputText: string
@@ -8,6 +8,7 @@ interface InputSectionProps {
   somenteExtras: boolean
   setSomenteExtras: (value: boolean) => void
   onCalculate: () => void
+  onJsonImport: (file: File) => void
   error: string
 }
 
@@ -17,9 +18,20 @@ export default function InputSection({
   somenteExtras,
   setSomenteExtras,
   onCalculate,
+  onJsonImport,
   error,
 }: InputSectionProps) {
   const [showHint, setShowHint] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      onJsonImport(file)
+      // Reset input para permitir selecionar o mesmo arquivo novamente
+      e.target.value = ''
+    }
+  }
 
   return (
     <div className="mb-8">
@@ -96,14 +108,44 @@ export default function InputSection({
         placeholder="2024-01-15 08:00 - 17:00&#10;2024-01-16 08:00 - 18:30&#10;2024-01-17 22:00 - 06:00"
       />
 
-      <button
-        type="button"
-        onClick={onCalculate}
-        data-testid="calculate-button"
-        className="mt-4 w-full md:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
-      >
-        Calcular Horas
-      </button>
+      <div className="mt-4 flex gap-3 w-full flex-col md:flex-row">
+        <button
+          type="button"
+          onClick={onCalculate}
+          data-testid="calculate-button"
+          className="flex-1 md:flex-none px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+        >
+          Calcular Horas
+        </button>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          onChange={handleFileChange}
+          className="hidden"
+          aria-label="Importar arquivo JSON"
+        />
+
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="flex-1 md:flex-none px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          Importar JSON
+        </button>
+      </div>
 
       {error && (
         <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg">

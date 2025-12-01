@@ -77,6 +77,65 @@ export default function Home() {
     }
   }, [inputText, config, somenteExtras])
 
+  const handleJsonImport = useCallback((file: File) => {
+    const reader = new FileReader()
+
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string
+        const data = JSON.parse(content)
+
+        // Validar estrutura do JSON
+        if (!data.entries || !Array.isArray(data.entries)) {
+          setError('Arquivo JSON inválido: campo "entries" não encontrado ou não é um array')
+          return
+        }
+
+        if (!data.year || !data.month) {
+          setError('Arquivo JSON inválido: campos "year" e "month" são obrigatórios')
+          return
+        }
+
+        // Converter entries para o formato de texto aceito pelo parser
+        const lines = data.entries.map((entry: any) => {
+          if (!entry.day || !entry.startTime || !entry.endTime) {
+            throw new Error('Entry inválido: campos "day", "startTime" e "endTime" são obrigatórios')
+          }
+
+          // Formatar data como YYYY-MM-DD
+          const year = data.year
+          const month = String(data.month).padStart(2, '0')
+          const day = String(entry.day).padStart(2, '0')
+          const dateStr = `${year}-${month}-${day}`
+
+          // Criar linha no formato aceito pelo parser
+          return `${dateStr} ${entry.startTime} - ${entry.endTime}`
+        })
+
+        // Limpar registros existentes e adicionar os novos
+        setRecords([])
+        setError('')
+        setInputText(lines.join('\n'))
+
+        // Processar automaticamente após 100ms (para dar tempo do estado atualizar)
+        setTimeout(() => {
+          parseInput()
+        }, 100)
+
+      } catch (error) {
+        setError(
+          `Erro ao importar arquivo JSON: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
+        )
+      }
+    }
+
+    reader.onerror = () => {
+      setError('Erro ao ler o arquivo')
+    }
+
+    reader.readAsText(file)
+  }, [parseInput])
+
   const totais = records.reduce(
     (acc, record) => ({
       horasTrabalhadas: acc.horasTrabalhadas + record.horasTrabalhadas,
@@ -192,6 +251,7 @@ export default function Home() {
             somenteExtras={somenteExtras}
             setSomenteExtras={setSomenteExtras}
             onCalculate={parseInput}
+            onJsonImport={handleJsonImport}
             error={error}
           />
         </div>
