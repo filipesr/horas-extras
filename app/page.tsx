@@ -51,6 +51,7 @@ export default function Home() {
   const [somenteExtras, setSomenteExtras] = useState(true)
   const [error, setError] = useState<string>('')
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false)
+  const [employeeName, setEmployeeName] = useState<string>('')
 
   const valorHora =
     config.tipoSalario === 'hora'
@@ -91,25 +92,25 @@ export default function Home() {
           return
         }
 
-        if (!data.year || !data.month) {
-          setError('Arquivo JSON inválido: campos "year" e "month" são obrigatórios')
-          return
+        // Extrair e formatar informações do funcionário
+        if (data.name && data.cpf) {
+          setEmployeeName(`${data.name} - ${data.cpf}`)
         }
 
         // Converter entries para o formato de texto aceito pelo parser
         const lines = data.entries.map((entry: any) => {
-          if (!entry.day || !entry.startTime || !entry.endTime) {
-            throw new Error('Entry inválido: campos "day", "startTime" e "endTime" são obrigatórios')
+          if (!entry.date || !entry.startTime || !entry.endTime) {
+            throw new Error('Entry inválido: campos "date", "startTime" e "endTime" são obrigatórios')
           }
 
-          // Formatar data como YYYY-MM-DD
-          const year = data.year
-          const month = String(data.month).padStart(2, '0')
-          const day = String(entry.day).padStart(2, '0')
-          const dateStr = `${year}-${month}-${day}`
+          // Validar formato da data (deve ser YYYY-MM-DD)
+          const datePattern = /^\d{4}-\d{2}-\d{2}$/
+          if (!datePattern.test(entry.date)) {
+            throw new Error(`Data inválida "${entry.date}": deve estar no formato YYYY-MM-DD`)
+          }
 
           // Criar linha no formato aceito pelo parser
-          return `${dateStr} ${entry.startTime} - ${entry.endTime}`
+          return `${entry.date} ${entry.startTime} - ${entry.endTime}`
         })
 
         // Limpar registros existentes e adicionar os novos
@@ -257,7 +258,13 @@ export default function Home() {
         </div>
 
         {/* Tabela de Resultados - Imprime */}
-        <ResultsTable records={records} totais={totais} currency={config.currency} />
+        <ResultsTable
+          records={records}
+          totais={totais}
+          currency={config.currency}
+          employeeName={employeeName}
+          onEmployeeNameChange={setEmployeeName}
+        />
 
         {/* Cards de Resumo - Não imprime */}
         {records.length > 0 && (

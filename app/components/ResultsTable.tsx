@@ -5,6 +5,8 @@ interface ResultsTableProps {
   records: WorkRecord[]
   totais: Totals
   currency: 'BRL' | 'PYG' | 'USD'
+  employeeName?: string
+  onEmployeeNameChange?: (name: string) => void
 }
 
 const getTipoDiaLabel = (tipoDia: TipoDia): string => {
@@ -29,7 +31,7 @@ const getTipoDiaColor = (tipoDia: TipoDia): string => {
   return colors[tipoDia]
 }
 
-export default function ResultsTable({ records, totais, currency }: ResultsTableProps) {
+export default function ResultsTable({ records, totais, currency, employeeName, onEmployeeNameChange }: ResultsTableProps) {
   if (records.length === 0) return null
 
   // Função auxiliar para formatar período de trabalho
@@ -37,19 +39,26 @@ export default function ResultsTable({ records, totais, currency }: ResultsTable
     const entradaDate = new Date(entrada)
     const saidaDate = new Date(saida)
 
-    const diaEntrada = entradaDate.getDate()
-    const diaSaida = saidaDate.getDate()
-    const mesEntrada = entradaDate.getMonth()
-    const mesSaida = saidaDate.getMonth()
+    // Formatar datas como dd/mm/yyyy
+    const dataEntrada = entradaDate.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
+    const dataSaida = saidaDate.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
 
     const horaEntrada = entradaDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
     const horaSaida = saidaDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 
     // Verifica se cruzou dias
-    if (diaEntrada !== diaSaida || mesEntrada !== mesSaida) {
-      return `de ${diaEntrada}, ${horaEntrada} ao ${diaSaida}, ${horaSaida}`
+    if (dataEntrada !== dataSaida) {
+      return `de ${dataEntrada}, ${horaEntrada} ao ${dataSaida}, ${horaSaida}`
     } else {
-      return `dia ${diaEntrada}, de ${horaEntrada} às ${horaSaida}`
+      return `${dataEntrada}, de ${horaEntrada} às ${horaSaida}`
     }
   }
 
@@ -57,7 +66,13 @@ export default function ResultsTable({ records, totais, currency }: ResultsTable
     <div className="mb-8">
       <h2 className="flex gap-2 text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
         Resultados de
-        <input type="text" className="flex-1 peer bg-transparent border-t-transparent border-b-2 border-x-transparent border-b-gray-200 focus:border-t-transparent focus:border-x-transparent focus:border-b-blue-500 focus:ring-0 disabled:opacity-50 disabled:pointer-events-none dark:border-b-neutral-700 dark:placeholder-neutral-500 dark:focus:ring-neutral-600 dark:focus:border-b-neutral-600" placeholder="nome do funcionário"></input>
+        <input
+          type="text"
+          value={employeeName || ''}
+          onChange={(e) => onEmployeeNameChange?.(e.target.value)}
+          className="flex-1 peer bg-transparent border-t-transparent border-b-2 border-x-transparent border-b-gray-200 focus:border-t-transparent focus:border-x-transparent focus:border-b-blue-500 focus:ring-0 disabled:opacity-50 disabled:pointer-events-none dark:border-b-neutral-700 dark:placeholder-neutral-500 dark:focus:ring-neutral-600 dark:focus:border-b-neutral-600"
+          placeholder="nome do funcionário"
+        />
       </h2>
 
       <div className="overflow-x-auto">
