@@ -28,7 +28,7 @@ Preencha os campos de configuração:
 - **Horas Diárias de Trabalho**: Jornada diária padrão (ex: 8 horas)
 - **Adicional Hora Extra**: Percentual de acréscimo para horas extras (ex: 50%)
 - **Adicional Noturno**: Percentual de acréscimo para horas noturnas (ex: 20%)
-- **Horário Noturno**: Defina o início e fim do período noturno (padrão: 22h às 5h)
+- **Horário Noturno**: Defina o início e fim do período noturno (padrão: 20h às 6h no Paraguay, 22h às 5h no Brasil)
 
 ### 2. Registros de Horas
 
