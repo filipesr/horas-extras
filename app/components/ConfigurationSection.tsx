@@ -408,7 +408,7 @@ export default function ConfigurationSection({
                 setConfig({ ...config, fimNoturno: parseInt(e.target.value) || 0 })
               }
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              placeholder="5"
+              placeholder="6"
             />
           </div>
         </div>
