@@ -13,25 +13,25 @@ import SummaryCards from './components/SummaryCards'
 
 export default function Home() {
   const [config, setConfig] = useState<Config>({
-    regime: 'Brasil',
+    regime: 'Paraguay',
     tipoSalario: 'mensal',
     valorSalario: 1000,
-    horasMensais: 220,
+    horasMensais: 192,
     currency: 'USD',
 
     // Percentuais de hora extra
     percentualExtraDiurna: 50,
-    percentualExtraNoturna: 50,
+    percentualExtraNoturna: 100, // 100% sobre a hora noturna base
     percentualExtraDomingoFeriado: 100,
 
     // Adicional noturno
     percentualNoturno: 30,
     noturnoSegSex: true,
     noturnoSabado: true,
-    noturnoDomingoFeriado: true,
+    noturnoDomingoFeriado: true, // Paraguay NÃO acumula
 
     // Tipo de acumulação
-    adicionaisSomados: true, // Brasil soma os adicionais
+    adicionaisSomados: false, // Paraguay multiplica em cascata
 
     // Compatibilidade
     percentualExtra: 50,
@@ -39,8 +39,8 @@ export default function Home() {
     percentualFeriado: 100,
 
     horasDiarias: 8,
-    horasSabado: 4,
-    inicioNoturno: 22,
+    horasSabado: 5,
+    inicioNoturno: 20,
     fimNoturno: 6,
     feriados: [],
     sabadosLivres: [],
