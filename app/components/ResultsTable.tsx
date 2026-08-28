@@ -128,7 +128,10 @@ export default function ResultsTable({ records, totais, currency, employeeName, 
                   {getTipoDiaLabel(record.tipoDia)}
                 </td>
                 <td className="px-2 py-2 text-xs text-center text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
-                  {formatHours(record.horasTrabalhadas)} → {formatCurrency(record.valorNormal, currency)}
+                  {/* Horas normais = trabalhadas - extras. É a base do valorNormal ao lado:
+                      exibir horasTrabalhadas aqui inflava as horas (ex: sábado 14h-22h com
+                      jornada de 5h mostrava 8h no lugar das 5h efetivamente normais). */}
+                  {formatHours(record.horasTrabalhadas - record.horasExtras)} → {formatCurrency(record.valorNormal, currency)}
                 </td>
                 <td className="px-2 py-2 text-xs text-center text-orange-600 dark:text-orange-400 font-medium border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                   {record.valorExtra > 0
@@ -155,7 +158,8 @@ export default function ResultsTable({ records, totais, currency, employeeName, 
                 TOTAIS
               </td>
               <td className="px-2 py-3 text-xs text-center text-gray-800 dark:text-gray-200 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
-                {formatHours(totais.horasTrabalhadas)} → {formatCurrency(totais.valorNormal, currency)}
+                {/* Mesma regra da coluna Normal por linha: soma apenas das horas normais */}
+                {formatHours(totais.horasTrabalhadas - totais.horasExtras)} → {formatCurrency(totais.valorNormal, currency)}
               </td>
               <td className="px-2 py-3 text-xs text-center text-orange-700 dark:text-orange-300 border-t-2 border-primary-400 dark:border-primary-600 whitespace-nowrap">
                 {formatHours(totais.horasExtras)} → {formatCurrency(totais.valorExtra, currency)}
